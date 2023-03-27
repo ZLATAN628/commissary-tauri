@@ -40,6 +40,7 @@
 import { NImageGroup, NImage, NSpace, NNumberAnimation, NButton } from 'naive-ui';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { invoke } from "@tauri-apps/api/tauri";
 
 const amount = ref(0.00)
 const numberAnimationInstRef = ref(null)
@@ -50,18 +51,20 @@ onMounted(() => {
     if (route.params.productList) {
         productList = JSON.parse(route.params.productList);
         amount.value = Number(route.params.amount);
-        console.log(productList)
         numberAnimationInstRef.value?.play()
 
     }
 })
 
-function doSettle() {
+async function doSettle() {
+    productList.forEach(element => {
+        element.image = "";
+    });
+    let data = JSON.stringify(productList);
+    let res = await invoke('do_settle', { "data": data })
+    console.log(res);
     router.push({
         name: 'Main',
-        params: {
-            oper: 'doSettle',
-        }
     })
 }
 

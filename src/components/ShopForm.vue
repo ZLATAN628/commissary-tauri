@@ -170,11 +170,6 @@ function Sub(stock_sn) {
     });
 }
 
-function getSrc(index) {
-    index = index % 3 + 1;
-    return "/src/resource/" + index + ".jpeg"
-}
-
 let filterProductList = computed(() => {
     return productList.value.filter(e => productType.value === 0 || e.product_type == productType.value)
 });
@@ -192,37 +187,26 @@ function insertProduct() {
     });
 }
 
-async function doSettle(type = 0) {
+async function doSettle() {
     let settle_list = productList.value.filter(e => e.cur > 0);
     if (!settle_list || settle_list.length <= 0) {
         return;
     }
-    if (type === 1) {
-        console.log("DOsettle");
-        let res = await invoke('do_settle', { "data": JSON.stringify(settle_list) })
-    } else {
-        let temp = productList.value;
-        router.push({
-            name: "Qrcode",
-            params: {
-                productList: JSON.stringify(temp),
-                amount: Number(totalAmount.value)
-            }
-        })
 
-    }
-
-
+    let temp = productList.value;
+    router.push({
+        name: "Qrcode",
+        params: {
+            productList: JSON.stringify(temp),
+            amount: Number(totalAmount.value)
+        }
+    })
 }
 
 onMounted(() => {
     if (route.params) {
         console.log("param", route.params.oper)
-        if (route.params.oper === 'doSettle' && productList.value.length > 0) {
-            // 支付成功 本地结算
-            console.log("doSettle")
-            doSettle(1)
-        } else if (route.params.oper) {
+        if (route.params.oper) {
             USER_NAME = route.params.oper
         }
     }
