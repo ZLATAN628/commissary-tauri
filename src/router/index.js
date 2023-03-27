@@ -3,9 +3,14 @@ import Main from '../views/Main.vue'
 import { appLocalDataDir } from '@tauri-apps/api/path';
 
 const routes = [
-    // { path: "/", redirect: "/index" },
     {
-        path: '/:isSettle*',
+        path: "/",
+        name: 'Login',
+        component: () =>
+            import('../views/Login.vue')
+    },
+    {
+        path: '/Main/:oper*',
         name: 'Main',
         component: Main
     },
@@ -16,7 +21,7 @@ const routes = [
             import('../views/Product.vue')
     },
     {
-        path: '/Qrcode/:amount',
+        path: '/Qrcode/:productList:amount',
         name: 'Qrcode',
         component: () =>
             import('../views/Qrcode.vue')

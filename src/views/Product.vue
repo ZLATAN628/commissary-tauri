@@ -20,7 +20,7 @@
         </n-form-item>
         <n-form-item label="上传商品图片">
             <n-upload :data="model.image" name="image" :on-update:file-list="fileChange">
-                <n-button>Upload file</n-button>
+                <n-button>上传文件</n-button>
             </n-upload>
         </n-form-item>
         <div style="display: flex; justify-content: flex-end">

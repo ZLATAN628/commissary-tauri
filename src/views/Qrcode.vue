@@ -45,11 +45,14 @@ const amount = ref(0.00)
 const numberAnimationInstRef = ref(null)
 let route = useRoute();
 let router = useRouter();
+let productList;
 onMounted(() => {
-    console.log(route.params)
-    if (route.params) {
+    if (route.params.productList) {
+        productList = JSON.parse(route.params.productList);
         amount.value = Number(route.params.amount);
+        console.log(productList)
         numberAnimationInstRef.value?.play()
+
     }
 })
 
@@ -57,7 +60,7 @@ function doSettle() {
     router.push({
         name: 'Main',
         params: {
-            doSettle: 1,
+            oper: 'doSettle',
         }
     })
 }

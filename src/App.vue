@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ct">
     <div style="width: 100%;text-align: center;">
       <n-gradient-text gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)">
         <h1>云经济小卖部</h1>
@@ -25,4 +25,13 @@ import { NGradientText } from "naive-ui";
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #249b73);
 } */
+.ct {
+  background-image: url('./resource/background.jpg');
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 590px;
+  height: 770px;
+  background-size: 590px 770px;
+}
 </style>

@@ -56,14 +56,14 @@
             <n-button type="info" strong secondary round @click="insertProduct" style="margin-right: 100px;">
                 发布商品
             </n-button>
-            <n-gradient-text type="warning" style="margin-right: 40px;font-size: 20px;">
+            <n-gradient-text type="primary" style="margin-right: 40px;font-size: 20px;">
                 已选
                 {{ selectedShopNum }}
                 件商品，共计
                 {{ totalAmount }}
                 元
             </n-gradient-text>
-            <n-button type="warning" strong secondary round @click="doSettle">
+            <n-button type="primary" strong secondary round @click="doSettle">
                 结算
             </n-button>
         </div>
@@ -89,6 +89,7 @@ import {
 } from "@vicons/ionicons5";
 import { invoke } from "@tauri-apps/api/tauri";
 
+let USER_NAME = "";
 const router = useRouter();
 // 已选商品数
 const selectedShopNum = ref(0)
@@ -197,11 +198,14 @@ async function doSettle(type = 0) {
         return;
     }
     if (type === 1) {
+        console.log("DOsettle");
         let res = await invoke('do_settle', { "data": JSON.stringify(settle_list) })
     } else {
+        let temp = productList.value;
         router.push({
             name: "Qrcode",
             params: {
+                productList: JSON.stringify(temp),
                 amount: Number(totalAmount.value)
             }
         })
@@ -212,11 +216,18 @@ async function doSettle(type = 0) {
 }
 
 onMounted(() => {
-    if (route.params && route.params.doSettle == 1 && productList.value.length > 0) {
-        // 支付成功 本地结算
-        doSettle(1)
+    if (route.params) {
+        console.log("param", route.params.oper)
+        if (route.params.oper === 'doSettle' && productList.value.length > 0) {
+            // 支付成功 本地结算
+            console.log("doSettle")
+            doSettle(1)
+        } else if (route.params.oper) {
+            USER_NAME = route.params.oper
+        }
     }
 })
+
 
 </script>
 

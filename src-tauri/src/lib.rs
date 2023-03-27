@@ -3,10 +3,12 @@ use chrono::{
     prelude::*,
     ParseResult,
 };
+use ini::Ini;
 use mysql::prelude::*;
 use mysql::*;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
+use std::{fs::File, path::Path};
 
 static DB_POOL: OnceCell<Pool> = OnceCell::new();
 // let static POOL = Pool::new("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info").unwrap();
@@ -27,8 +29,6 @@ pub struct Product {
 }
 
 pub fn get_product_list0() -> String {
-    // TODO 待删除
-    get_user_info0();
     let mut conn = DB_POOL
         .get()
         .expect("Error get pool from OneCell<Pool>")
@@ -92,8 +92,15 @@ pub fn get_user_info0() -> String {
                 .expect(&format!("Error connecting to Mysql")),
         )
         .unwrap();
+    // 解析配置文件
+    parse_ini()
+}
 
-    String::from("")
+pub fn write_user_info0(name: String) -> String {
+    let mut config = Ini::new();
+    config.with_section(Some("main")).set("name", name);
+    config.write_to_file("./config.ini").unwrap();
+    String::from("写入成功")
 }
 
 pub fn do_settle0(data: String) -> String {
@@ -103,5 +110,55 @@ pub fn do_settle0(data: String) -> String {
             return String::from(e.to_string());
         }
     };
+
+    println!("{:?}", obj);
     String::from("结算成功")
+}
+
+fn parse_ini() -> String {
+    let path = Path::new("./config.ini");
+
+    let ini_file = match Ini::load_from_file(path) {
+        Ok(ini) => ini,
+        Err(e) => {
+            File::create(&path).unwrap();
+            match Ini::load_from_file(path) {
+                Ok(ini) => ini,
+                Err(e) => {
+                    return format!("加载文件失败：{}", e);
+                }
+            }
+        }
+    };
+    let result = IniResult::new(ini_file);
+    match serde_json::to_string(&result) {
+        Ok(s) => s,
+        Err(e) => return format!("转换 JSON 失败：{}", e),
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct IniResult {
+    name: String,
+}
+
+impl IniResult {
+    pub fn new(ini_file: Ini) -> IniResult {
+        let mut res = IniResult {
+            name: String::new(),
+        };
+        for (sec, prop) in ini_file.iter() {
+            if let Some(section) = sec {
+                if section == "main" {
+                    for (k, v) in prop.iter() {
+                        if k == "name" {
+                            res.name.push_str(v);
+                        }
+                    }
+                }
+            }
+            println!("Section: {:?}", sec);
+        }
+        res
+    }
 }
