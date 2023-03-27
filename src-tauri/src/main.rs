@@ -2,7 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    do_settle0, get_product_list0, get_user_info0, insert_product0, write_user_info0,
+    do_settle0, get_carousel_list0, get_product_list0, get_user_info0, insert_product0,
+    write_user_info0,
 };
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -18,8 +19,8 @@ fn insert_product(data: String) -> String {
 }
 
 #[tauri::command]
-fn get_user_info() -> String {
-    get_user_info0()
+fn get_user_info(flag: i32) -> String {
+    get_user_info0(flag)
 }
 
 #[tauri::command]
@@ -32,6 +33,11 @@ fn do_settle(data: String) -> String {
     do_settle0(data)
 }
 
+#[tauri::command]
+fn get_carousel_list() -> String {
+    get_carousel_list0()
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -39,7 +45,8 @@ fn main() {
             get_product_list,
             get_user_info,
             do_settle,
-            write_user_info
+            write_user_info,
+            get_carousel_list
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

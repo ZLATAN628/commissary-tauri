@@ -23,7 +23,7 @@
                 <n-button>上传文件</n-button>
             </n-upload>
         </n-form-item>
-        <div style="display: flex; justify-content: flex-end">
+        <div style="text-align: center;">
             <n-button round type="primary" @click="handleValidateButtonClick">
                 提交
             </n-button>
@@ -35,12 +35,13 @@
 </template>
   
 <script setup>
-import { defineComponent, ref } from "vue";
-import { NForm, NFormItem, NButton, NUpload, NInput, NSelect, NInputNumber } from "naive-ui";
+import { ref } from "vue";
+import { NForm, NFormItem, NButton, NUpload, NInput, NSelect, NInputNumber, useMessage } from "naive-ui";
 import { useRouter } from "vue-router";
 import { invoke } from "@tauri-apps/api/tauri";
 
 const formRef = ref(null);
+const message = useMessage();
 
 const model = ref({
     product_name: null,
@@ -115,10 +116,19 @@ function handleValidateButtonClick(e) {
                 return;
             }
             invoke("insert_product", { 'data': JSON.stringify(model.value, null, 2) }).then(e => {
-                alert(e);
-                cancelClick();
+                message.success("新增成功")
+                model.value = {
+                    product_name: null,
+                    product_type: null,
+                    cost: null,
+                    count: null,
+                    price: null,
+                    image: null,
+                    owner: '张建华'
+                }
+                // cancelClick();
             }).catch(e => {
-                alert(e)
+                message.error("新增失败")
             });
         }
     });

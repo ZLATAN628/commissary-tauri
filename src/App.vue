@@ -1,12 +1,14 @@
 <template>
-  <div class="ct">
-    <div style="width: 100%;text-align: center;">
-      <n-gradient-text gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)">
-        <h1>云经济小卖部</h1>
-      </n-gradient-text>
+  <n-message-provider>
+    <div class="ct">
+      <div style="width: 100%;text-align: center;">
+        <n-gradient-text gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)">
+          <h1>云经济小卖部</h1>
+        </n-gradient-text>
+      </div>
+      <router-view />
     </div>
-    <router-view />
-  </div>
+  </n-message-provider>
 </template>
 
 <script setup>
@@ -14,7 +16,7 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 // import Carousel from "./components/Carousel.vue";
 // import ShopForm from "./components/ShopForm.vue";
-import { NGradientText } from "naive-ui";
+import { NGradientText, NMessageProvider } from "naive-ui";
 </script>
 
 <style scoped>

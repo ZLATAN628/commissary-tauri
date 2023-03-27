@@ -10,7 +10,7 @@ const routes = [
             import('../views/Login.vue')
     },
     {
-        path: '/Main/:oper*',
+        path: '/Main/:username*',
         name: 'Main',
         component: Main
     },

@@ -1,14 +1,9 @@
-use chrono::{
-    format::{DelayedFormat, StrftimeItems},
-    prelude::*,
-    ParseResult,
-};
 use ini::Ini;
 use mysql::prelude::*;
 use mysql::*;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
-use std::{f32::consts::E, fs::File, path::Path};
+use std::{fs::File, path::Path};
 
 static DB_POOL: OnceCell<Pool> = OnceCell::new();
 // let static POOL = Pool::new("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info").unwrap();
@@ -136,14 +131,17 @@ pub fn insert_product0(data: String) -> String {
     String::from("Ok")
 }
 
-// 只会获取一次人员信息，所以在这初始化数据库连接
-pub fn get_user_info0() -> String {
-    DB_POOL
-        .set(
-            mysql::Pool::new("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info")
-                .expect(&format!("Error connecting to Mysql")),
-        )
-        .unwrap();
+pub fn get_user_info0(flag: i32) -> String {
+    // 第一次获取人员信息，初始化数据库连接
+    if flag == 0 {
+        DB_POOL
+            .set(
+                mysql::Pool::new("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info")
+                    .expect(&format!("Error connecting to Mysql")),
+            )
+            .unwrap();
+    }
+
     // 解析配置文件
     let result = parse_ini();
     match serde_json::to_string(&result) {
@@ -231,6 +229,26 @@ fn parse_ini() -> IniResult {
     IniResult::new(ini_file)
 }
 
+pub fn get_carousel_list0() -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+    let result: Vec<Image> = conn
+        .query_map(
+            "select image from commissary_image_save where image_type = 1",
+            |image| Image { image },
+        )
+        .unwrap();
+    serde_json::to_string(&result).unwrap()
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct Image {
+    image: String,
+}
+
 #[derive(Serialize, Deserialize)]
 struct IniResult {
     name: String,
@@ -251,7 +269,6 @@ impl IniResult {
                     }
                 }
             }
-            println!("Section: {:?}", sec);
         }
         res
     }
