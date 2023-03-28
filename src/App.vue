@@ -1,10 +1,10 @@
 <template>
   <n-message-provider>
     <div class="ct">
-      <div style="width: 100%;text-align: center;">
-        <n-gradient-text gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)">
+      <div style="width: 100%;height: 110px;">
+        <!-- <n-gradient-text gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)">
           <h1>云经济小卖部</h1>
-        </n-gradient-text>
+        </n-gradient-text> -->
       </div>
       <router-view />
     </div>
@@ -33,7 +33,7 @@ import { NGradientText, NMessageProvider } from "naive-ui";
   top: 0;
   left: 0;
   width: 590px;
-  height: 770px;
-  background-size: 590px 770px;
+  height: 790px;
+  background-size: 590px 790px;
 }
 </style>

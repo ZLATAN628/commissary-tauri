@@ -134,11 +134,26 @@ pub fn insert_product0(data: String) -> String {
 pub fn get_user_info0(flag: i32) -> String {
     // 第一次获取人员信息，初始化数据库连接
     if flag == 0 {
+        let config_str;
+        {
+            let pool = mysql::Pool::new("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info")
+                .expect(&format!("Error connecting to Mysql"));
+            let mut conn = pool
+                .get_conn()
+                .expect(&format!("Error get connection from pool"));
+            let mut config: Vec<String> = conn
+                .query_map(
+                    "select image from commissary_image_save where image_type = 99",
+                    |image| image,
+                )
+                .unwrap();
+            config_str = match config.pop() {
+                Some(config) => config,
+                None => String::from("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info"),
+            };
+        }
         DB_POOL
-            .set(
-                mysql::Pool::new("mysql://root:Ycx19981118.@47.99.168.139:3306/kt_info")
-                    .expect(&format!("Error connecting to Mysql")),
-            )
+            .set(mysql::Pool::new(&config_str[..]).expect(&format!("Error connecting to Mysql")))
             .unwrap();
     }
 

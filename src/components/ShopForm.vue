@@ -21,8 +21,8 @@
                                     <div style="margin-left: 10px;margin-top: 10px; float: left;max-width: 200px;max-height: 300px;display: inline-block;background-color: black;"
                                         v-for="item in filterProductList" key="item.stock_sn">
                                         <n-card size="small" tag="span" hoverable>
-                                            <template #cover>
-                                                <img :src="item.image">
+                                            <template #cover style="width 80px;height: 80px;">
+                                                <n-image :src="item.image" width="198" height="193" />
                                             </template>
                                             <template #header>
                                                 <label style="font-size: 10px;">{{ item.product_name }}</label>
@@ -57,12 +57,16 @@
                         </n-layout-footer>
                     </n-layout>
                 </n-space>
-                <div style="text-align: right;margin-top: 10px;">
-                    <n-button type="info" strong secondary round @click="insertProduct" style="margin-right: 80px;"
+                <div style="text-align: right;margin-top: 10px;display: inline-block;">
+                    <n-button type="info" strong secondary round @click="getProductList" style="margin-right: 10px;"
+                        v-show="buttonShow">
+                        刷新库存
+                    </n-button>
+                    <n-button type="info" strong secondary round @click="insertProduct" style="margin-right: 10px;"
                         v-show="buttonShow">
                         发布商品
                     </n-button>
-                    <n-gradient-text font-mono font-extrabold type="primary" style="margin-right: 40px;font-size: 20px;">
+                    <n-gradient-text font-mono font-extrabold type="primary" style="margin-right: 10px;font-size: 20px;">
                         已选
                         <label style="color: rebeccapurple;">{{ selectedShopNum }}</label>
                         件商品，共计
@@ -85,7 +89,7 @@ import {
     NCard, NSpace, NBadge, NButtonGroup,
     NButton, NIcon, NLayout, NLayoutSider,
     NMenu, NLayoutFooter, NLayoutHeader,
-    NGradientText, useMessage, NSpin
+    NGradientText, useMessage, NSpin, NImage
 } from "naive-ui";
 import { MdAdd, MdRemove } from "@vicons/ionicons4";
 import { Coffee, Cup, BorderAll, Meat } from "@vicons/tabler";
@@ -133,18 +137,16 @@ const inverted = ref(true)
 
 //------------------------页面初始流程-----------------------------
 
-show.value = true;
 getProductList();
 getUserInfo();
 
 //------------------------Rust 函数-------------------------------
 
 async function getProductList() {
+    show.value = true;
     let data = await invoke("get_product_list", {});
     productList.value = JSON.parse(data);
-    if (show.value) {
-        show.value = false;
-    }
+    show.value = false;
 }
 
 

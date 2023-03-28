@@ -12,6 +12,11 @@
   },
   "tauri": {
     "allowlist": {
+      "fs": {
+        "scope": [
+          "*"
+        ]
+      },
       "all": true
     },
     "bundle": {
@@ -43,7 +48,7 @@
         "resizable": false,
         "title": "commissary-tauri",
         "width": 590,
-        "height": 770,
+        "height": 790,
         "theme": "Dark",
         "alwaysOnTop": true
       }
