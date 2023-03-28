@@ -1,11 +1,19 @@
 <template>
     <div style="height: 550px;">
-        <div style="text-align: center;">
-            <p style="color: red;font-size: xx-large;">
+        <div style="margin-left: 130px;">
+            <p style="color:aquamarine;font-size: 35px;font-family:方正舒体;">
                 小本经营 诚信买卖
             </p>
         </div>
-        <div style="margin-left: 50px;margin-top: 40px">
+        <div style="text-align: center;margin-top: 100px;">
+            <n-button type="primary" @click="doSettle" :disabled="paybutton" size="large">
+                我已支付
+            </n-button>
+            <n-button type="error" style="margin-left: 50px;" @click="cancel" size="large">
+                取消支付
+            </n-button>
+        </div>
+        <div style="margin-left: 50px;margin-top: 22px">
             <n-image-group>
                 <n-space>
                     <n-image width="250" height="350" :src='aliCode' />
@@ -13,26 +21,23 @@
                 </n-space>
             </n-image-group>
         </div>
-        <div style="text-align: center;">
-            <p style="color: red;font-size: xx-large;">
+        <div style="text-align: center;margin-top: 10px;font-family:方正舒体;">
+            <n-gradient-text font-mono font-extrabold type="error" style="font-size: xx-large;">
                 您本次购物结算金额为
-                <n-number-animation ref="numberAnimationInstRef" :from="0.00" :to="amount" :active="true" :precision="2" />
+                <label style="color: #fff0e2">
+                    <n-number-animation ref="numberAnimationInstRef" :from="0.00" :to="amount" :active="true"
+                        :precision="2" />
+                </label>
                 元
-            </p>
+            </n-gradient-text>
+
         </div>
-        <div style="text-align: center;">
-            <n-button type="primary" @click="doSettle" :disabled="paybutton">
-                我已支付
-            </n-button>
-            <n-button type="tertiary" style="margin-left: 50px;" @click="cancel">
-                取消支付
-            </n-button>
-        </div>
+
     </div>
 </template>
 
 <script setup>
-import { NImageGroup, NImage, NSpace, NNumberAnimation, NButton, useMessage } from 'naive-ui';
+import { NImageGroup, NImage, NSpace, NNumberAnimation, NButton, useMessage, NGradientText } from 'naive-ui';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/tauri";
@@ -58,11 +63,12 @@ async function doSettle() {
         element.image = "";
     });
     let data = JSON.stringify(productList);
-    let res = await invoke('do_settle', { "data": data })
-    if (res === '结算成功') {
+    let e = await invoke('do_settle', { "data": data })
+    let res = JSON.parse(e);
+    if (res.code === 0) {
         message.success("结算成功！！！ 请自行前往张建华身后的零食柜领取商品！！！")
     } else {
-        message.error("结算失败！！！请联系俞晨星！！！")
+        message.error("结算失败！！！请联系俞晨星！！！" + res.msg)
     }
     router.push({
         name: 'Main',

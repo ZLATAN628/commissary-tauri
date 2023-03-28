@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="height: 240px;">
         <n-carousel show-arrow autoplay>
             <img v-for="item in getCarouselList" class="carousel-img" :src="item.image">
         </n-carousel>
@@ -14,8 +14,9 @@ import { invoke } from "@tauri-apps/api/tauri";
 const carouselList = ref([]);
 
 invoke('get_carousel_list').then(data => {
-    if (data) {
-        carouselList.value = JSON.parse(data)
+    let res = JSON.parse(data);
+    if (res.code === 0) {
+        carouselList.value = res.data;
     }
 }).catch(e => {
     console.log(e);

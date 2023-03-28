@@ -16,9 +16,9 @@
                                 <n-menu :inverted="inverted" :collapsed-width="64" :collapsed-icon-size="22"
                                     :options="menuOptions" :on-update:value="changeProductType" />
                             </n-layout-sider>
-                            <n-layout style="height: 320px;background-color: bisque;" :native-scrollbar="false">
+                            <n-layout style="height: 320px;background-color: #abc8ce;" :native-scrollbar="false">
                                 <div style="display: inline-block;font-size: 10px;">
-                                    <div style="margin-left: 10px;margin-top: 10px; float: left;max-width: 200px;max-height: 300px;display: inline-block;background-color: black;"
+                                    <div style="margin-left: 10px;margin-top: 10px; float: left;max-width: 200px;max-height: 300px;display: inline-block;"
                                         v-for="item in filterProductList" key="item.stock_sn">
                                         <n-card size="small" tag="span" hoverable>
                                             <template #cover style="width 80px;height: 80px;">
@@ -57,23 +57,26 @@
                         </n-layout-footer>
                     </n-layout>
                 </n-space>
-                <div style="text-align: right;margin-top: 10px;display: inline-block;">
-                    <n-button type="info" strong secondary round @click="getProductList" style="margin-right: 10px;"
-                        v-show="buttonShow">
+                <div style="text-align: right;width: 100%;margin-top: 5px;display: inline-block;">
+                    <n-button color="#fcf4df" text-color="#397971" round @click="getProductList"
+                        style="margin-right: 5px;font-family:方正舒体;font-size: large;" strong="true">
                         刷新库存
                     </n-button>
-                    <n-button type="info" strong secondary round @click="insertProduct" style="margin-right: 10px;"
-                        v-show="buttonShow">
+                    <n-button color="#fcf4df" text-color="#397971" strong round @click="insertProduct"
+                        style="margin-right: 5px;font-family:方正舒体;font-size: large;" v-show="buttonShow">
                         发布商品
                     </n-button>
-                    <n-gradient-text font-mono font-extrabold type="primary" style="margin-right: 10px;font-size: 20px;">
-                        已选
-                        <label style="color: rebeccapurple;">{{ selectedShopNum }}</label>
-                        件商品，共计
-                        <label style="color: rebeccapurple;">{{ totalAmount }}</label>
-                        元
+                    <n-gradient-text font-mono font-extrabold type="primary" style="margin-right: 5px;font-size: 20px;">
+                        <label style="font-family:方正舒体;">
+                            已选
+                            <label style="color: #fff0e2;font-size: larger;">{{ selectedShopNum }}</label>
+                            件商品，共计
+                            <label style="color: #fff0e2;font-size: larger;">{{ totalAmount }}</label>
+                            元
+                        </label>
                     </n-gradient-text>
-                    <n-button type="primary" strong secondary round @click="doSettle">
+                    <n-button color="#487c78" text-color="#fff0e2" style="font-family:方正舒体;font-size: 20px;" round
+                        @click="doSettle">
                         结算
                     </n-button>
                 </div>
@@ -133,7 +136,7 @@ const menuOptions = ref([
 
 const show = ref(false)
 
-const inverted = ref(true)
+const inverted = ref(false)
 
 //------------------------页面初始流程-----------------------------
 
@@ -145,7 +148,14 @@ getUserInfo();
 async function getProductList() {
     show.value = true;
     let data = await invoke("get_product_list", {});
-    productList.value = JSON.parse(data);
+    let res = JSON.parse(data)
+    if (res.code === 0) {
+        productList.value = res.data;
+    } else {
+        message.error("获取商品数据失败" + res.msg);
+    }
+    selectedShopNum.value = 0;
+    totalAmount.value = 0;
     show.value = false;
 }
 
@@ -214,10 +224,10 @@ async function doSettle() {
 
 
 async function getUserInfo() {
-    const res = await invoke('get_user_info', { 'flag': 1 });
-    if (res) {
-        let obj = JSON.parse(res)
-        if (obj && (obj.name === '俞晨星' || obj.name === '张建华')) {
+    let data = await invoke('get_user_info', { 'flag': 1 });
+    let res = JSON.parse(data);
+    if (res.code === 0) {
+        if (res.data.name === '俞晨星' || res.data.name === '张建华') {
             buttonShow.value = true;
         }
     }

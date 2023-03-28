@@ -28,7 +28,7 @@ import { NGradientText, NMessageProvider } from "naive-ui";
   filter: drop-shadow(0 0 2em #249b73);
 } */
 .ct {
-  background-image: url('./resource/background.jpg');
+  background-image: url('./resource/background.png');
   position: fixed;
   top: 0;
   left: 0;

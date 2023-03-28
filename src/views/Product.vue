@@ -79,11 +79,6 @@ const rules = {
         trigger: ["blur", "input"],
         message: "请输入商品名称"
     },
-    // product_type: {
-    //     required: true,
-    //     trigger: ["blur", "change"],
-    //     message: "请选择商品类型"
-    // },
     cost: {
         type: "number",
         required: true,
@@ -116,17 +111,21 @@ function handleValidateButtonClick(e) {
                 return;
             }
             invoke("insert_product", { 'data': JSON.stringify(model.value, null, 2) }).then(e => {
-                message.success("新增成功")
-                model.value = {
-                    product_name: null,
-                    product_type: null,
-                    cost: null,
-                    count: null,
-                    price: null,
-                    image: null,
-                    owner: '张建华'
+                let res = JSON.parse(e);
+                if (res.code == 0) {
+                    message.success("新增成功")
+                    model.value = {
+                        product_name: null,
+                        product_type: null,
+                        cost: null,
+                        count: null,
+                        price: null,
+                        image: null,
+                        owner: '张建华'
+                    }
+                } else {
+                    message.error(res.msg)
                 }
-                // cancelClick();
             }).catch(e => {
                 message.error("新增失败")
             });

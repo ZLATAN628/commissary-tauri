@@ -49,7 +49,7 @@
         "title": "commissary-tauri",
         "width": 590,
         "height": 790,
-        "theme": "Dark",
+        "theme": "Light",
         "alwaysOnTop": true
       }
     ]
