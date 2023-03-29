@@ -13,7 +13,7 @@ IDE 推荐使用 VS Code
   
 启动流程：  
 1.拉取项目  
-  git clone https://github.com/yooneskh/vite-tauri-template app-name  
+  git clone https://github.com/ZLATAN628/commissary-tauri.git  
 2.进入项目根目录  
   cd commissary-tauri  
 3.下载依赖  
