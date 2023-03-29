@@ -20,8 +20,6 @@ IDE 推荐使用 VS Code
   yarn install  
 4.启动项目  
   yarn tauri dev 
-5.测试
-  测试
   
 项目开发过程中可以参考的官文文档：  
 ui框架: Naive Ui - https://www.naiveui.com/zh-CN/os-theme/components/avatar  
