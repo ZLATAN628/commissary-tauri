@@ -19,8 +19,16 @@ IDE 推荐使用 VS Code
 3.下载依赖  
   yarn install  
 4.启动项目  
-  yarn tauri dev  
+  yarn tauri dev 
   
+项目开发过程中可以参考的官文文档：  
+ui框架: Naive Ui - https://www.naiveui.com/zh-CN/os-theme/components/avatar  
+前端框架: Vue3 - https://cn.vuejs.org/api/  
+          Vue Router4 - https://router.vuejs.org/zh/guide/  
+后端: Rust - https://rustwiki.org/zh-CN/book/title-page.html  
+客户端框架: Tauri - https://tauri.app/zh-cn/v1/api/js/  
+图标: xicons - https://www.xicons.org/#/
+数据库: mysql
   
   
 PS: 打包项目命令 : yarn tauri build
