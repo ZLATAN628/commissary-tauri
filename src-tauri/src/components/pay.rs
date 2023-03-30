@@ -18,6 +18,14 @@ pub struct PayRecord {
     amount: f32,
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PayRecordShow {
+    no: i32,
+    pay_time: String,
+    info: String,
+    amount: f32,
+}
+
 impl PayRecord {
     fn from_settle_list(settle_list: Vec<Product>, pay_ide: i32) -> Vec<PayRecord> {
         let config = parse_ini();
@@ -93,5 +101,24 @@ pub fn do_settle0(data: String) -> String {
     ) {
         Ok(_) => JsResult::success(String::from("结算成功")),
         Err(e) => JsResult::<String>::fail(format!("结算失败：{}", e)),
+    }
+}
+
+pub fn get_pay_record_list0(name: String) -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+
+    match conn.query_map("select pay_ide no, date_format(b.pay_time, '%Y-%m-%d %h:%m:%s') pay_time, group_concat('', concat(a.product_name, '*', b.num)) info, sum(b.amount) from commissary_product_main a, commissary_transaction_record b where a.stock_sn = b.stock_sn and b.customer_name = '俞晨星' group by pay_ide, b.pay_time order by pay_ide desc", 
+    |(no, pay_time, info, amount)| PayRecordShow {
+        no,
+        pay_time,
+        info,
+        amount,
+    }) {
+        Ok(v) => JsResult::success(v),
+        Err(e) => JsResult::<String>::fail(format!("查询支付记录失败：{}", e)),
     }
 }

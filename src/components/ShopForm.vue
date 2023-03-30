@@ -8,13 +8,14 @@
                 <n-space vertical>
                     <n-layout>
                         <n-layout-header :inverted="inverted" bordered>
-                            <n-menu mode="horizontal" :inverted="inverted" :options="menuOptions" />
+                            <n-menu mode="horizontal" :inverted="inverted" :options="menuOptions"
+                                :on-update:value="changeMenu" />
                         </n-layout-header>
                         <n-layout has-sider>
                             <n-layout-sider bordered show-trigger collapse-mode="width" :collapsed-width="64" :width="140"
                                 :native-scrollbar="false" :inverted="inverted" style="height: 320px">
                                 <n-menu :inverted="inverted" :collapsed-width="64" :collapsed-icon-size="22"
-                                    :options="menuOptions" :on-update:value="changeProductType" />
+                                    :options="productOptions" :on-update:value="changeProductType" />
                             </n-layout-sider>
                             <n-layout style="height: 320px;background-color: #abc8ce;" :native-scrollbar="false">
                                 <div style="display: inline-block;font-size: 10px;">
@@ -31,8 +32,7 @@
                                                 <label style="font-size: 10px;">单价： {{ item.price }} 元</label>
                                             </template>
                                             <template #action>
-                                                <n-space :size="24" item-style="text-align: right">
-                                                    <n-badge :value="item.cur" :max="item.count" />
+                                                <n-space :size="24" item-style="text-align: right;">
                                                     <n-button-group>
                                                         <n-button @click="Add(item.stock_sn)">
                                                             <template #icon>
@@ -45,6 +45,18 @@
                                                             </template>
                                                         </n-button>
                                                     </n-button-group>
+                                                    <n-badge :max="item.count" :processing="true" color="green">
+                                                        <template #default>
+                                                            <label style="font-family:方正舒体;"><label
+                                                                    style="font-size: large
+                                                                                                                                    ;">{{
+                                                                                                                                        item.cur
+                                                                                                                                    }}</label>
+                                                                / {{ item.count
+                                                                }}</label>
+                                                        </template>
+                                                    </n-badge>
+
                                                 </n-space>
                                             </template>
                                         </n-card>
@@ -111,7 +123,7 @@ const productType = ref(0)
 
 const buttonShow = ref(false)
 
-const menuOptions = ref([
+const productOptions = ref([
     {
         label: "全部",
         key: "0",
@@ -134,9 +146,25 @@ const menuOptions = ref([
     },
 ]);
 
+const menuOptions = ref([
+    {
+        label: "商品分类",
+        key: "0",
+        disabled: true,
+        icon: renderIcon(BorderAll)
+    },
+    {
+        label: "历史订单",
+        key: "1",
+        icon: renderIcon(Meat),
+    },
+])
+
 const show = ref(false)
 
 const inverted = ref(false)
+
+const userInfo = ref({})
 
 //------------------------页面初始流程-----------------------------
 
@@ -230,7 +258,15 @@ async function getUserInfo() {
         if (res.data.name === '俞晨星' || res.data.name === '张建华') {
             buttonShow.value = true;
         }
+        userInfo.value = { "name": res.data.name }
     }
+}
+
+function changeMenu() {
+    router.push({
+        name: "History",
+        params: userInfo.value
+    })
 }
 
 

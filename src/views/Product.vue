@@ -19,7 +19,7 @@
             <n-input-number v-model:value="model.price" />
         </n-form-item>
         <n-form-item label="上传商品图片">
-            <n-upload :data="model.image" name="image" :on-update:file-list="fileChange">
+            <n-upload :data="model.image" name="image" :on-update:file-list="fileChange" ref="imageRef">
                 <n-button>上传文件</n-button>
             </n-upload>
         </n-form-item>
@@ -101,6 +101,8 @@ const rules = {
 
 const router = useRouter();
 
+let imageRef = ref();
+
 
 function handleValidateButtonClick(e) {
     e.preventDefault();
@@ -123,6 +125,7 @@ function handleValidateButtonClick(e) {
                         image: null,
                         owner: '张建华'
                     }
+                    imageRef.value.clear();
                 } else {
                     message.error(res.msg)
                 }

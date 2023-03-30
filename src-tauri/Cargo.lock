@@ -501,6 +501,7 @@ version = "0.0.0"
 dependencies = [
  "chrono",
  "mysql",
+ "mysql_common",
  "once_cell",
  "rust-ini",
  "serde",
@@ -2006,6 +2007,7 @@ dependencies = [
  "byteorder",
  "bytes",
  "cc",
+ "chrono",
  "cmake",
  "crc32fast",
  "flate2",

@@ -25,6 +25,12 @@ const routes = [
         name: 'Qrcode',
         component: () =>
             import('../views/Qrcode.vue')
+    },
+    {
+        path: '/History/:name',
+        name: 'History',
+        component: () =>
+            import('../views/History.vue')
     }
 ]
 

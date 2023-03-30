@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    do_settle0, get_carousel_list0, get_product_list0, get_user_info0, insert_product0,
-    write_user_info0,
+    do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0, get_user_info0,
+    insert_product0, write_user_info0,
 };
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -38,15 +38,22 @@ fn get_carousel_list() -> String {
     get_carousel_list0()
 }
 
+#[tauri::command]
+fn get_pay_record_list(name: String) -> String {
+    get_pay_record_list0(name)
+}
+
 fn main() {
     tauri::Builder::default()
+        // 提供给前端调用的rust函数 都需要在这个地方注册
         .invoke_handler(tauri::generate_handler![
             insert_product,
             get_product_list,
             get_user_info,
             do_settle,
             write_user_info,
-            get_carousel_list
+            get_carousel_list,
+            get_pay_record_list
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
