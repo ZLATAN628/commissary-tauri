@@ -36,6 +36,10 @@ impl Product {
     pub fn get_stock_sn(&self) -> Option<i32> {
         self.stock_sn
     }
+
+    pub fn get_product_name(&self) -> &str {
+        self.product_name.as_str()
+    }
 }
 
 pub fn get_product_list0() -> String {

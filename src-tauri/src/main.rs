@@ -3,7 +3,7 @@
 
 use commissary_tauri::{
     do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0, get_user_info0,
-    insert_product0, write_user_info0,
+    insert_product0, test0, write_user_info0, JsResult,
 };
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -29,8 +29,8 @@ fn write_user_info(name: String) -> String {
 }
 
 #[tauri::command]
-fn do_settle(data: String) -> String {
-    do_settle0(data)
+async fn do_settle(data: String) -> String {
+    do_settle0(data).await
 }
 
 #[tauri::command]
@@ -43,6 +43,14 @@ fn get_pay_record_list(name: String) -> String {
     get_pay_record_list0(name)
 }
 
+#[tauri::command]
+async fn test() -> String {
+    match test0().await {
+        Ok(msg) => msg,
+        Err(err) => JsResult::<String>::fail(err.to_string()),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         // 提供给前端调用的rust函数 都需要在这个地方注册
@@ -53,7 +61,8 @@ fn main() {
             do_settle,
             write_user_info,
             get_carousel_list,
-            get_pay_record_list
+            get_pay_record_list,
+            test
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

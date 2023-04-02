@@ -281,6 +281,7 @@ async function getUserInfo() {
     let data = await invoke('get_user_info', { 'flag': 1 });
     let res = JSON.parse(data);
     if (res.code === 0) {
+        console.log("username::::", res.data.name);
         if (res.data.name === '俞晨星' || res.data.name === '张建华') {
             buttonShow.value = true;
         }
@@ -291,7 +292,7 @@ async function getUserInfo() {
 function changeMenu() {
     router.push({
         name: "History",
-        params: userInfo.value
+        params: userInfo.value.name
     })
 }
 

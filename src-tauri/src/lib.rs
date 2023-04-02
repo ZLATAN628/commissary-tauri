@@ -5,11 +5,12 @@ pub use components::{
     ini_parse::{get_user_info0, write_user_info0},
     pay::{do_settle0, get_pay_record_list0},
     product::{get_product_list0, insert_product0},
+    qq_robot::test0,
 };
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
-struct JsResult<T> {
+pub struct JsResult<T> {
     code: i32,
     msg: String,
     data: Option<T>,
