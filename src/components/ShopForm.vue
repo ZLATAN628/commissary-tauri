@@ -10,6 +10,9 @@
                         <n-layout-header :inverted="inverted" bordered>
                             <n-menu mode="horizontal" :inverted="inverted" :options="menuOptions"
                                 :on-update:value="changeMenu" />
+                            <n-input v-model:value="searchText"
+                                style="min-width: 150px;float: right;margin-top: 5px;margin-right: 5px;" autosize autofocus
+                                type="text" placeholder="搜索商品名称" />
                         </n-layout-header>
                         <n-layout has-sider>
                             <n-layout-sider bordered show-trigger collapse-mode="width" :collapsed-width="64" :width="140"
@@ -19,7 +22,7 @@
                             </n-layout-sider>
                             <n-layout style="height: 320px;background-color: #abc8ce;" :native-scrollbar="false">
                                 <div style="display: inline-block;font-size: 10px;">
-                                    <div style="margin-left: 10px;margin-top: 10px; float: left;max-width: 200px;max-height: 300px;display: inline-block;"
+                                    <div style="margin-left: 10px;margin-top: 10px; float: left;max-width: 200px;max-height: 350px;display: inline-block;"
                                         v-for="item in filterProductList" key="item.stock_sn">
                                         <n-card size="small" tag="span" hoverable>
                                             <template #cover style="width 80px;height: 80px;">
@@ -30,6 +33,24 @@
                                             </template>
                                             <template #header-extra>
                                                 <label style="font-size: 10px;">单价： {{ item.price }} 元</label>
+                                            </template>
+                                            <template #footer>
+                                                <n-rate size="small" allow-half readonly />
+                                                <n-button tertiary circle text style="margin-left: 15px;">
+                                                    <template #icon>
+                                                        <n-icon color="#397971">
+                                                            <thumbs-up />
+                                                        </n-icon>
+                                                    </template>
+                                                </n-button>
+                                                <n-button tertiary circle text style="margin-left: 10px;">
+                                                    <template #icon>
+                                                        <n-icon color="#abc8ce">
+                                                            <thumbs-down />
+                                                        </n-icon>
+                                                    </template>
+                                                </n-button>
+
                                             </template>
                                             <template #action>
                                                 <n-space :size="24" item-style="text-align: right;">
@@ -47,13 +68,10 @@
                                                     </n-button-group>
                                                     <n-badge :max="item.count" :processing="true" color="green">
                                                         <template #default>
-                                                            <label style="font-family:方正舒体;"><label
-                                                                    style="font-size: large
-                                                                                                                                    ;">{{
-                                                                                                                                        item.cur
-                                                                                                                                    }}</label>
-                                                                / {{ item.count
-                                                                }}</label>
+                                                            <label style="font-family:方正舒体;">
+                                                                <label style="font-size: large;">{{ item.cur }}</label>/ {{
+                                                                    item.count }}
+                                                            </label>
                                                         </template>
                                                     </n-badge>
 
@@ -104,10 +122,11 @@ import {
     NCard, NSpace, NBadge, NButtonGroup,
     NButton, NIcon, NLayout, NLayoutSider,
     NMenu, NLayoutFooter, NLayoutHeader,
-    NGradientText, useMessage, NSpin, NImage
+    NGradientText, useMessage, NSpin, NImage,
+    NRate, NInput
 } from "naive-ui";
-import { MdAdd, MdRemove } from "@vicons/ionicons4";
-import { Coffee, Cup, BorderAll, Meat } from "@vicons/tabler";
+import { MdAdd, MdRemove, MdThumbsUp as thumbsUp, MdThumbsDown as thumbsDown } from "@vicons/ionicons4";
+import { Coffee, Cup, BorderAll, Meat, History } from "@vicons/tabler";
 import { invoke } from "@tauri-apps/api/tauri";
 
 const message = useMessage();
@@ -156,15 +175,17 @@ const menuOptions = ref([
     {
         label: "历史订单",
         key: "1",
-        icon: renderIcon(Meat),
+        icon: renderIcon(History),
     },
 ])
-
+// 商品列表的遮罩是否显示
 const show = ref(false)
-
+// 商品列表样式反转
 const inverted = ref(false)
-
+// 当前登录人员信息
 const userInfo = ref({})
+// 搜索框内容
+const searchText = ref("")
 
 //------------------------页面初始流程-----------------------------
 
@@ -218,7 +239,12 @@ function Sub(stock_sn) {
 }
 
 let filterProductList = computed(() => {
-    return productList.value.filter(e => productType.value === 0 || e.product_type == productType.value)
+    if (searchText.value !== "") {
+        return productList.value.filter(e => ~e.product_name.indexOf(searchText.value))
+    } else {
+        return productList.value.filter(e => productType.value === 0 || e.product_type == productType.value)
+    }
+
 });
 
 function changeProductType(key, item) {
