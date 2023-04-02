@@ -28,7 +28,8 @@ ui框架: Naive Ui - https://www.naiveui.com/zh-CN/os-theme/components/avatar
 后端: Rust - https://rustwiki.org/zh-CN/book/title-page.html  
 客户端框架: Tauri - https://tauri.app/zh-cn/v1/api/js/  
 图标: xicons - https://www.xicons.org/#/  
-数据库: mysql
+数据库: mysql  
+qqApi接入: go-cqhttp - https://docs.go-cqhttp.org/api   
   
   
 PS: 打包项目命令 : yarn tauri build
