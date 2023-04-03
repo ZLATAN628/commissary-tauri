@@ -54,11 +54,7 @@ const columns = ref([
     }
 ]);
 
-
-getRecordList();
-
 async function getRecordList() {
-    console.log("username", username.value)
     let res = await invoke('get_pay_record_list', { 'name': username.value });
     res = JSON.parse(res);
     if (res.code === 0) {
@@ -69,8 +65,8 @@ async function getRecordList() {
 };
 
 onMounted(() => {
-    console.log(route.params.name)
     username.value = route.params.name
+    getRecordList();
 })
 
 function goBack() {

@@ -144,9 +144,8 @@ pub fn get_pay_record_list0(name: String) -> String {
         .unwrap();
 
     let sql = format!("select pay_ide no, date_format(b.pay_time, '%Y-%m-%d %h:%m:%s') pay_time, group_concat('', concat(a.product_name, '*', b.num)) info, sum(b.amount) from commissary_product_main a,
-     commissary_transaction_record b where a.stock_sn = b.stock_sn and b.customer_name = {} group by pay_ide, b.pay_time order by pay_ide desc", &name);
+     commissary_transaction_record b where a.stock_sn = b.stock_sn and b.customer_name = '{}' group by pay_ide, b.pay_time order by pay_ide desc", &name);
 
-    println!("sql：   {}", sql);
     match conn.query_map(&sql, |(no, pay_time, info, amount)| PayRecordShow {
         no,
         pay_time,
