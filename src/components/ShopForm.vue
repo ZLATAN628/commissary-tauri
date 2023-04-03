@@ -36,14 +36,16 @@
                                             </template>
                                             <template #footer>
                                                 <n-rate size="small" allow-half readonly />
-                                                <n-button tertiary circle text style="margin-left: 15px;">
+                                                <n-button tertiary circle text style="margin-left: 15px;"
+                                                    @click="goodComment(item.stock_sn)">
                                                     <template #icon>
                                                         <n-icon color="#397971">
                                                             <thumbs-up />
                                                         </n-icon>
                                                     </template>
                                                 </n-button>
-                                                <n-button tertiary circle text style="margin-left: 10px;">
+                                                <n-button tertiary circle text style="margin-left: 10px;"
+                                                    @click="badComment(item.stock_sn)">
                                                     <template #icon>
                                                         <n-icon color="#abc8ce">
                                                             <thumbs-down />
@@ -251,6 +253,31 @@ function changeProductType(key, item) {
     productType.value = Number(key);
 }
 
+function goodComment(stock_sn) {
+    productList.value.filter(e => e.stock_sn === stock_sn).forEach(e => {
+        if (e.state === 1) {
+            // do nothing
+        } else if (e.state === 2) {
+
+        } else {
+
+        }
+    });
+}
+
+function badComment(stock_sn) {
+    productList.value.filter(e => e.stock_sn === stock_sn).forEach(e => {
+        if (e.state === 1) {
+
+        } else if (e.state === 2) {
+            // do nothing
+        } else {
+
+        }
+        e.rate = (e.good + 1) / (e.good + e.bad)
+    });
+}
+
 /**
  * 发布商品
  */
@@ -281,7 +308,6 @@ async function getUserInfo() {
     let data = await invoke('get_user_info', { 'flag': 1 });
     let res = JSON.parse(data);
     if (res.code === 0) {
-        console.log("username::::", res.data.name);
         if (res.data.name === '俞晨星' || res.data.name === '张建华') {
             buttonShow.value = true;
         }
@@ -292,7 +318,9 @@ async function getUserInfo() {
 function changeMenu() {
     router.push({
         name: "History",
-        params: userInfo.value.name
+        params: {
+            "name": userInfo.value.name
+        }
     })
 }
 
