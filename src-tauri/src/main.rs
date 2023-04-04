@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0, get_user_info0,
-    insert_product0, test0, write_user_info0, JsResult,
+    addComment0, do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0,
+    get_user_info0, insert_product0, test0, write_user_info0, JsResult,
 };
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -44,6 +44,11 @@ fn get_pay_record_list(name: String) -> String {
 }
 
 #[tauri::command]
+fn addComment(state: i32) -> String {
+    addComment0(state)
+}
+
+#[tauri::command]
 async fn test() -> String {
     match test0().await {
         Ok(msg) => msg,
@@ -62,7 +67,8 @@ fn main() {
             write_user_info,
             get_carousel_list,
             get_pay_record_list,
-            test
+            test,
+            addComment
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

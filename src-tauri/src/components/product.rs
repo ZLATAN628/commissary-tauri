@@ -21,7 +21,7 @@ pub struct Product {
     good: Option<i32>,
     bad: Option<i32>,
     state: Option<i32>,
-    rate: Option<i32>,
+    rate: Option<f32>,
 }
 
 impl Product {
@@ -38,10 +38,10 @@ impl Product {
         bad: i32,
         state: i32,
     ) -> Product {
-        let mut rate = 0;
+        let mut rate = 0.0;
         let total = good + bad;
         if total != 0 {
-            rate = good / total;
+            rate = (good as f32 / total as f32) * 5.0;
         }
 
         Product {

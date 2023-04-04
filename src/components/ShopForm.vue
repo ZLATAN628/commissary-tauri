@@ -35,23 +35,33 @@
                                                 <label style="font-size: 10px;">单价： {{ item.price }} 元</label>
                                             </template>
                                             <template #footer>
-                                                <n-rate size="small" allow-half readonly />
-                                                <n-button tertiary circle text style="margin-left: 15px;"
-                                                    @click="goodComment(item.stock_sn)">
-                                                    <template #icon>
-                                                        <n-icon color="#397971">
-                                                            <thumbs-up />
-                                                        </n-icon>
+                                                <n-rate size="small" allow-half readonly :value="item.rate" />
+                                                <n-popover trigger="hover">
+                                                    <template #trigger>
+                                                        <n-button tertiary circle text style="margin-left: 15px;"
+                                                            @click="goodComment(item.stock_sn)">
+                                                            <template #icon>
+                                                                <n-icon color="#397971">
+                                                                    <thumbs-up />
+                                                                </n-icon>
+                                                            </template>
+                                                        </n-button>
                                                     </template>
-                                                </n-button>
-                                                <n-button tertiary circle text style="margin-left: 10px;"
-                                                    @click="badComment(item.stock_sn)">
-                                                    <template #icon>
-                                                        <n-icon color="#abc8ce">
-                                                            <thumbs-down />
-                                                        </n-icon>
+                                                    <span>如果觉得好吃的话 就点个赞吧 ♪(^∇^*) </span>
+                                                </n-popover>
+                                                <n-popover trigger="hover">
+                                                    <template #trigger>
+                                                        <n-button tertiary circle text style="margin-left: 10px;"
+                                                            @click="badComment(item.stock_sn)">
+                                                            <template #icon>
+                                                                <n-icon color="#abc8ce">
+                                                                    <thumbs-down />
+                                                                </n-icon>
+                                                            </template>
+                                                        </n-button>
                                                     </template>
-                                                </n-button>
+                                                    <span>看起来是很难吃的东西了 o(一︿一+)o</span>
+                                                </n-popover>
 
                                             </template>
                                             <template #action>
@@ -125,7 +135,7 @@ import {
     NButton, NIcon, NLayout, NLayoutSider,
     NMenu, NLayoutFooter, NLayoutHeader,
     NGradientText, useMessage, NSpin, NImage,
-    NRate, NInput
+    NRate, NInput, NPopover
 } from "naive-ui";
 import { MdAdd, MdRemove, MdThumbsUp as thumbsUp, MdThumbsDown as thumbsDown } from "@vicons/ionicons4";
 import { Coffee, Cup, BorderAll, Meat, History } from "@vicons/tabler";
@@ -258,24 +268,27 @@ function goodComment(stock_sn) {
         if (e.state === 1) {
             // do nothing
         } else if (e.state === 2) {
-
+            e.rate = Number((e.good + 1) / (e.good + e.bad) * 5).toFixed(2)
         } else {
-
+            e.rate = Number((e.good + 1) / (e.good + e.bad + 1) * 5).toFixed(2)
         }
     });
+
+    invoke('addComment', { 'state': 1 })
 }
 
 function badComment(stock_sn) {
     productList.value.filter(e => e.stock_sn === stock_sn).forEach(e => {
         if (e.state === 1) {
-
+            e.rate = Number((e.good - 1) / (e.good + e.bad) * 5).toFixed(2)
         } else if (e.state === 2) {
             // do nothing
         } else {
-
+            e.rate = Number((e.good - 1) / (e.good + e.bad + 1) * 5).toFixed(2)
         }
-        e.rate = (e.good + 1) / (e.good + e.bad)
     });
+
+    invoke('addComment', { 'state': 2 })
 }
 
 /**

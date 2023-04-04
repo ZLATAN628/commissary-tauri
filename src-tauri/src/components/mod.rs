@@ -1,3 +1,4 @@
+pub mod comments;
 pub mod images;
 pub mod ini_parse;
 pub mod pay;
