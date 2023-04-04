@@ -263,32 +263,42 @@ function changeProductType(key, item) {
     productType.value = Number(key);
 }
 
-function goodComment(stock_sn) {
+async function goodComment(stock_sn) {
     productList.value.filter(e => e.stock_sn === stock_sn).forEach(e => {
         if (e.state === 1) {
             // do nothing
         } else if (e.state === 2) {
             e.rate = Number((e.good + 1) / (e.good + e.bad) * 5).toFixed(2)
+            e.state = 1
+            e.good += 1
+            e.bad -= 1
         } else {
             e.rate = Number((e.good + 1) / (e.good + e.bad + 1) * 5).toFixed(2)
+            e.state = 1
+            e.good += 1
         }
     });
-
-    invoke('addComment', { 'state': 1 })
+    await invoke('add_comment', { 'state': 1, 'stockSn': stock_sn })
 }
 
 function badComment(stock_sn) {
     productList.value.filter(e => e.stock_sn === stock_sn).forEach(e => {
         if (e.state === 1) {
             e.rate = Number((e.good - 1) / (e.good + e.bad) * 5).toFixed(2)
+            e.state = 2
+            e.good -= 1
+            e.bad += 1
         } else if (e.state === 2) {
             // do nothing
         } else {
             e.rate = Number((e.good - 1) / (e.good + e.bad + 1) * 5).toFixed(2)
+            e.state = 2
+            e.bad += 1
         }
     });
 
-    invoke('addComment', { 'state': 2 })
+    // 很tm离谱，前端传参一定要驼峰形式，后端接收要下划线形式，不然报错，妈的 stockSn -> stock_sn
+    invoke('add_comment', { 'state': 2, 'stockSn': stock_sn })
 }
 
 /**

@@ -1,7 +1,7 @@
 mod components;
 
 pub use components::{
-    comments::addComment0,
+    comments::add_comment0,
     images::get_carousel_list0,
     ini_parse::{get_user_info0, write_user_info0},
     pay::{do_settle0, get_pay_record_list0},

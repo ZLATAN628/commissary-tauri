@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    addComment0, do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0,
+    add_comment0, do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0,
     get_user_info0, insert_product0, test0, write_user_info0, JsResult,
 };
 
@@ -44,8 +44,8 @@ fn get_pay_record_list(name: String) -> String {
 }
 
 #[tauri::command]
-fn addComment(state: i32) -> String {
-    addComment0(state)
+fn add_comment(state: i32, stock_sn: i32) -> String {
+    add_comment0(state, stock_sn)
 }
 
 #[tauri::command]
@@ -68,7 +68,7 @@ fn main() {
             get_carousel_list,
             get_pay_record_list,
             test,
-            addComment
+            add_comment
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
