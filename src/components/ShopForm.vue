@@ -80,13 +80,12 @@
                                                     </n-button-group>
                                                     <n-badge :max="item.count" :processing="true" color="green">
                                                         <template #default>
-                                                            <label style="font-family:方正舒体;">
-                                                                <label style="font-size: large;">{{ item.cur }}</label>/ {{
-                                                                    item.count }}
+                                                            <label style="font-family:方正舒体;" @click="countAdd">
+                                                                <label style="font-size: large;">{{ item.cur }}</label>/
+                                                                {{ item.count }}
                                                             </label>
                                                         </template>
                                                     </n-badge>
-
                                                 </n-space>
                                             </template>
                                         </n-card>
@@ -105,7 +104,7 @@
                         刷新库存
                     </n-button>
                     <n-button color="#fcf4df" text-color="#397971" strong round @click="insertProduct"
-                        style="margin-right: 5px;font-family:方正舒体;font-size: large;" v-show="buttonShow">
+                        style="margin-right: 5px;font-family:方正舒体;font-size: large;" v-show="isRoot">
                         发布商品
                     </n-button>
                     <n-gradient-text font-mono font-extrabold type="primary" style="margin-right: 5px;font-size: 20px;">
@@ -152,7 +151,7 @@ const productList = ref([])
 // 当前分类的type
 const productType = ref(0)
 
-const buttonShow = ref(false)
+const isRoot = ref(false)
 
 const productOptions = ref([
     {
@@ -332,7 +331,7 @@ async function getUserInfo() {
     let res = JSON.parse(data);
     if (res.code === 0) {
         if (res.data.name === '俞晨星' || res.data.name === '张建华') {
-            buttonShow.value = true;
+            isRoot.value = true;
         }
         userInfo.value = { "name": res.data.name }
     }
@@ -345,6 +344,10 @@ function changeMenu() {
             "name": userInfo.value.name
         }
     })
+}
+
+function countAdd() {
+    console.log('asass')
 }
 
 
