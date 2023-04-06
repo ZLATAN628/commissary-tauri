@@ -49,8 +49,8 @@ fn add_comment(state: i32, stock_sn: i32) -> String {
 }
 
 #[tauri::command]
-async fn upload_file(path: String) -> String {
-    match upload_file0(path).await {
+async fn upload_file(path: String, file_type: String) -> String {
+    match upload_file0(path, file_type).await {
         Ok(msg) => msg,
         Err(err) => JsResult::<String>::fail(err.to_string()),
     }

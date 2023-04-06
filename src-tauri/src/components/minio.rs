@@ -2,11 +2,13 @@
 
 use std::fs::File;
 
+use chrono::Local;
+use regex::Regex;
 use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::{Bucket, Region};
 
-pub async fn upload_file0(path: String) -> Result<String, S3Error> {
+pub async fn upload_file0(path: String, file_type: String) -> Result<String, S3Error> {
     // This requires a running minio server at localhost:9000
     let bucket = Bucket::new(
         "commissary-tauri",
@@ -23,11 +25,18 @@ pub async fn upload_file0(path: String) -> Result<String, S3Error> {
         )?,
     )?
     .with_path_style();
-
-    let s3_path = "/image";
+    // 生成文件名
+    let now = Local::now();
+    let regexp = Regex::new("\\.(\\w+)$").unwrap();
+    let mut suffix = String::new();
+    for cap in regexp.captures_iter(&path) {
+        suffix.push_str(&cap[1]);
+    }
+    let s3_path = format!("/image/{}/{}.{}", file_type, now.timestamp_millis(), suffix);
 
     let mut path = tokio::fs::File::open(path).await?;
-    let status_code = bucket.put_object_stream(&mut path, s3_path).await?;
+    println!("path: {}", s3_path);
+    bucket.put_object_stream(&mut path, s3_path).await?;
 
     // bucket.put_object(s3_path, test).await.unwrap();
 
