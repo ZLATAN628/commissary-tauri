@@ -3,7 +3,7 @@
 
 use commissary_tauri::{
     add_comment0, do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0,
-    get_user_info0, insert_product0, test0, write_user_info0, JsResult,
+    get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
 };
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -49,8 +49,8 @@ fn add_comment(state: i32, stock_sn: i32) -> String {
 }
 
 #[tauri::command]
-async fn test() -> String {
-    match test0().await {
+async fn upload_file(path: String) -> String {
+    match upload_file0(path).await {
         Ok(msg) => msg,
         Err(err) => JsResult::<String>::fail(err.to_string()),
     }
@@ -67,7 +67,7 @@ fn main() {
             write_user_info,
             get_carousel_list,
             get_pay_record_list,
-            test,
+            upload_file,
             add_comment
         ])
         .run(tauri::generate_context!())

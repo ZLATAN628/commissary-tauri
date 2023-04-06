@@ -4,6 +4,7 @@ pub use components::{
     comments::add_comment0,
     images::get_carousel_list0,
     ini_parse::{get_user_info0, write_user_info0},
+    minio::upload_file0,
     pay::{do_settle0, get_pay_record_list0},
     product::{get_product_list0, insert_product0},
     qq_robot::test0,

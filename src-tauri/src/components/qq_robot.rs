@@ -39,7 +39,7 @@ pub async fn async_get(api: &str) -> Result<QqResponse, Box<dyn Error>> {
 pub async fn async_post(api: &str, param: &Value) -> Result<QqResponse, Box<dyn Error>> {
     let client = reqwest::Client::new();
     let body = client
-        .post(format!("http://127.0.0.1:5700/{}", api))
+        .post(format!("http://172.16.140.83:5700/{}", api))
         .json(param)
         .send()
         .await?

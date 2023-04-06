@@ -1,6 +1,7 @@
 pub mod comments;
 pub mod images;
 pub mod ini_parse;
+pub mod minio;
 pub mod pay;
 pub mod product;
 pub mod qq_robot;

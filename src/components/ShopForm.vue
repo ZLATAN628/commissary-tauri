@@ -346,8 +346,9 @@ function changeMenu() {
     })
 }
 
-function countAdd() {
-    console.log('asass')
+async function countAdd() {
+    let data = await invoke('upload_file', { 'path': './config.ini' })
+    console.log(data)
 }
 
 
