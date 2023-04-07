@@ -39,7 +39,7 @@ import { ref } from "vue";
 import { NForm, NFormItem, NButton, NUpload, NInput, NSelect, NInputNumber, useMessage } from "naive-ui";
 import { useRouter } from "vue-router";
 import { invoke } from "@tauri-apps/api/tauri";
-import { writeBinaryFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { writeBinaryFile, BaseDirectory, createDir } from '@tauri-apps/api/fs';
 import { appDataDir } from '@tauri-apps/api/path';
 
 const formRef = ref(null);
@@ -145,27 +145,17 @@ function cancelClick(e) {
 }
 
 async function fileChange(file) {
-    let dir = await appDataDir();
-    console.log(dir)
-    let fileName = (file[0].fullPath + "").replace("/", "")
-    let reader = new FileReader();
-    reader.readAsArrayBuffer(file[0].file)
-    reader.onload = async function (e) {
-        var fileU8A = new Uint8Array(e.target.result);
-        await writeBinaryFile(fileName, fileU8A, { dir: BaseDirectory.AppData });
-        let data = await invoke('upload_file', { 'path': dir + fileName, 'fileType': 'product' });
-
-        console.log(data);
-    };
-
-
-
-    // if (file && file.length > 0) {
-    //     let reader = new FileReader();
-    //     reader.readAsDataURL(file[0].file);
-    //     reader.onload = () => {
-    //         model.value.image = reader.result;
-    //     }
-    // }
+    if (file && file.length > 0) {
+        await createDir('temp', { dir: BaseDirectory.AppData, recursive: true });
+        let dir = await appDataDir();
+        let fileName = 'temp' + (file[0].fullPath + "").replace("/", "\\")
+        let reader = new FileReader();
+        reader.readAsArrayBuffer(file[0].file)
+        reader.onload = async function (e) {
+            var fileU8A = new Uint8Array(e.target.result);
+            await writeBinaryFile(fileName, fileU8A, { dir: BaseDirectory.AppData });
+        };
+        model.value.image = dir + fileName;
+    }
 }
 </script>

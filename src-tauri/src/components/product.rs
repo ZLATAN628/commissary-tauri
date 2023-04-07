@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::JsResult;
 
-use super::{ini_parse::parse_ini, DB_POOL};
+use super::{ini_parse::parse_ini, minio, DB_POOL};
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Product {
@@ -82,6 +82,13 @@ impl Product {
     pub fn get_product_name(&self) -> &str {
         self.product_name.as_str()
     }
+
+    fn get_image(&self) -> String {
+        match &self.image {
+            Some(e) => e.clone(),
+            None => String::new(),
+        }
+    }
 }
 
 pub fn get_product_list0() -> String {
@@ -146,13 +153,20 @@ where a.stock_sn = b.stock_sn
     }
 }
 
-pub fn insert_product0(data: String) -> String {
+pub async fn insert_product0(data: String) -> String {
     let obj: Product = match serde_json::from_str(&data) {
         Ok(v) => v,
         Err(e) => {
             return String::from(e.to_string());
         }
     };
+
+    // 先上传文件图片
+    let image = match minio::upload_file0(obj.get_image(), String::from("product")).await {
+        Ok(path) => path,
+        Err(err) => return JsResult::<String>::fail(format!("上传文件失败: {}", err)),
+    };
+
     let mut conn = DB_POOL
         .get()
         .expect("Error get pool from OneCell<Pool>")
@@ -167,7 +181,7 @@ pub fn insert_product0(data: String) -> String {
         "count" => obj.count,
         "price" => obj.price,
         "owner" => obj.owner,
-        "image" => obj.image,
+        "image" => image,
     }) {
         Ok(_) => JsResult::success(String::from("新增成功")),
         Err(e) => JsResult::<String>::fail(format!("新增失败：{}", e))

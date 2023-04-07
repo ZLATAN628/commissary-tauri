@@ -14,8 +14,8 @@ fn get_product_list() -> String {
 }
 
 #[tauri::command]
-fn insert_product(data: String) -> String {
-    insert_product0(data)
+async fn insert_product(data: String) -> String {
+    insert_product0(data).await
 }
 
 #[tauri::command]

@@ -80,7 +80,7 @@
                                                     </n-button-group>
                                                     <n-badge :max="item.count" :processing="true" color="green">
                                                         <template #default>
-                                                            <label style="font-family:方正舒体;" @click="countAdd">
+                                                            <label style="font-family:方正舒体;" @click="countAdd(item)">
                                                                 <label style="font-size: large;">{{ item.cur }}</label>/
                                                                 {{ item.count }}
                                                             </label>
@@ -98,6 +98,17 @@
                         </n-layout-footer>
                     </n-layout>
                 </n-space>
+                <n-modal v-model:show="showModal">
+                    <n-card style="width: 600px" title="增加库存" :bordered="false" size="huge" role="dialog" aria-modal="true">
+                        <template #header-extra>
+                            {{ countAddName }}
+                        </template>
+                        <n-input></n-input>
+                        <template #footer style="text-align: center;">
+                            <n-button>确认</n-button>
+                        </template>
+                    </n-card>
+                </n-modal>
                 <div style="text-align: right;width: 100%;margin-top: 5px;display: inline-block;">
                     <n-button color="#fcf4df" text-color="#397971" round @click="getProductList"
                         style="margin-right: 5px;font-family:方正舒体;font-size: large;" strong="true">
@@ -134,7 +145,7 @@ import {
     NButton, NIcon, NLayout, NLayoutSider,
     NMenu, NLayoutFooter, NLayoutHeader,
     NGradientText, useMessage, NSpin, NImage,
-    NRate, NInput, NPopover
+    NRate, NInput, NPopover, NModal
 } from "naive-ui";
 import { MdAdd, MdRemove, MdThumbsUp as thumbsUp, MdThumbsDown as thumbsDown } from "@vicons/ionicons4";
 import { Coffee, Cup, BorderAll, Meat, History } from "@vicons/tabler";
@@ -189,6 +200,10 @@ const menuOptions = ref([
         icon: renderIcon(History),
     },
 ])
+
+const countAddName = ref("")
+
+const showModal = ref(false)
 // 商品列表的遮罩是否显示
 const show = ref(false)
 // 商品列表样式反转
@@ -346,9 +361,10 @@ function changeMenu() {
     })
 }
 
-async function countAdd() {
-    let data = await invoke('upload_file', { 'path': './config.ini' })
-    console.log(data)
+// 添加库存
+async function countAdd(item) {
+    showModal.value = true
+    countAddName.value = item.product_name
 }
 
 
