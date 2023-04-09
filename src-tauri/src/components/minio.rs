@@ -1,7 +1,4 @@
 // minio 文件服务器相关操作
-
-use std::fs::File;
-
 use chrono::Local;
 use regex::Regex;
 use s3::creds::Credentials;

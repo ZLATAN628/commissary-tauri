@@ -60,6 +60,7 @@ async function getRecordList() {
     if (res.code === 0) {
         payRecordList.value = res.data;
     } else {
+        console.log(res)
         message.error(res.msg);
     }
 };

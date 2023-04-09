@@ -129,6 +129,7 @@ function handleValidateButtonClick(e) {
                     }
                     imageRef.value.clear();
                 } else {
+                    console.log(res)
                     message.error(res.msg)
                 }
             }).catch(e => {

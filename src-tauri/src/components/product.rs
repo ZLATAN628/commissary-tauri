@@ -2,7 +2,7 @@ use mysql::{params, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::JsResult;
+use crate::{components::config, JsResult};
 
 use super::{ini_parse::parse_ini, minio, qq_robot, DB_POOL};
 
@@ -224,7 +224,7 @@ pub async fn add_product_count0(num: i32, stock_sn: i32, name: String) -> String
     .unwrap();
 
     let param = json!({
-        "group_id": 771090124,
+        "group_id": config::get_config(1, 771090124),
         "message": format!("商品【{}】库存增加 {} 欢迎大家选购", name, num ),
     });
     match qq_robot::async_post("send_group_msg", &param).await {
@@ -243,7 +243,7 @@ async fn send_qq_msg(obj: Product) -> String {
         obj.count()
     );
     let param = json!({
-        "group_id": 771090124,
+        "group_id": config::get_config(1, 771090124),
         "message": message.as_str(),
     });
     match qq_robot::async_post("send_group_msg", &param).await {

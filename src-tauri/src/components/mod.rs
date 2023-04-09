@@ -1,4 +1,5 @@
 pub mod comments;
+pub mod config;
 pub mod images;
 pub mod ini_parse;
 pub mod minio;

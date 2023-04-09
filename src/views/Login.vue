@@ -45,6 +45,7 @@ async function getUserInfo() {
             });
         }
     } else {
+        console.log(obj)
         message.error(obj.msg);
     }
 }

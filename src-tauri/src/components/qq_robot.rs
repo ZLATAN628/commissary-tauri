@@ -1,9 +1,7 @@
-use std::error::Error;
-
+use crate::JsResult;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-
-use crate::JsResult;
+use std::error::Error;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct QqResponse {
@@ -16,7 +14,7 @@ pub struct QqResponse {
 }
 
 pub async fn test0() -> Result<String, Box<dyn Error>> {
-    // let res = async_get("/get_login_info").await?;
+    let _res = async_get("/get_login_info").await?;
     let param = json!({
         "user_id": 540188804,
         "message": "你好你一共消费 550 元 请立即缴费"
@@ -47,6 +45,5 @@ pub async fn async_post(api: &str, param: &Value) -> Result<QqResponse, Box<dyn 
         .await?;
 
     let res: QqResponse = serde_json::from_str(&body)?;
-    println!("{:?}", res);
     Ok(res)
 }

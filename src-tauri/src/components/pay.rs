@@ -1,15 +1,12 @@
-use chrono::{Local, TimeZone};
+use super::qq_robot::async_post;
+use super::DB_POOL;
+use super::{ini_parse::parse_ini, product::*};
+use crate::components::config;
+use crate::JsResult;
 use mysql::{params, prelude::*};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
-use crate::JsResult;
-
-use super::DB_POOL;
-
-use super::qq_robot::async_post;
-use super::{ini_parse::parse_ini, product::*};
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PayRecord {
@@ -123,7 +120,7 @@ pub async fn do_settle0(data: String) -> String {
 //     let compile = Regex::new("，$").unwrap();
 //     message = compile.replace(message.as_str(), "。").to_string();
 //     let param = json!({
-//         "group_id": 771090124,
+//         "group_id": config::get_config(1, 771090124),
 //         "message": message.as_str(),
 //     });
 //     match async_post("send_group_msg", &param).await {
@@ -138,8 +135,9 @@ pub async fn do_settle0(data: String) -> String {
 async fn send_qq_msg(settle_list: &Vec<Product>) -> String {
     let mut message = "库存警告：".to_string();
     let mut flag = false;
+    let warning_count = config::get_config(2, 5);
     for item in settle_list.iter() {
-        if item.get_num() > 0 && item.get_remain() < 5 {
+        if item.get_num() > 0 && item.get_remain() < warning_count {
             flag = true;
             message.push_str(
                 format!(
@@ -156,7 +154,7 @@ async fn send_qq_msg(settle_list: &Vec<Product>) -> String {
         message = compile.replace(message.as_str(), "。").to_string();
         message.push_str(" 请尽快补货！");
         let param = json!({
-            "group_id": 771090124,
+            "group_id": config::get_config(1, 771090124),
             "message": message.as_str(),
         });
         match async_post("send_group_msg", &param).await {
@@ -170,7 +168,6 @@ async fn send_qq_msg(settle_list: &Vec<Product>) -> String {
 }
 
 pub fn get_pay_record_list0(name: String) -> String {
-    println!("username:  {}", &name);
     let mut conn = DB_POOL
         .get()
         .expect("Error get pool from OneCell<Pool>")

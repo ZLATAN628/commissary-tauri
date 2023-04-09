@@ -76,6 +76,7 @@ async function doSettle() {
     if (res.code === 0) {
         message.success("结算成功！！！ 请自行前往张建华身后的零食柜领取商品！！！")
     } else {
+        console.log(res)
         message.error("结算失败！！！请联系俞晨星！！！" + res.msg)
     }
     router.push({

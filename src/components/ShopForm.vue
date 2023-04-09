@@ -232,6 +232,7 @@ async function getProductList() {
     if (res.code === 0) {
         productList.value = res.data;
     } else {
+        console.log(res)
         message.error("获取商品数据失败" + res.msg);
     }
     selectedShopNum.value = 0;
@@ -297,7 +298,9 @@ async function goodComment(stock_sn) {
             e.good += 1
         }
     });
-    await invoke('add_comment', { 'state': 1, 'stockSn': stock_sn })
+    await invoke('add_comment', { 'state': 1, 'stockSn': stock_sn }).catch(e => {
+        console.log(e)
+    })
 }
 
 function badComment(stock_sn) {
@@ -317,7 +320,9 @@ function badComment(stock_sn) {
     });
 
     // 很tm离谱，前端传参一定要驼峰形式，后端接收要下划线形式，不然报错，妈的 stockSn -> stock_sn
-    invoke('add_comment', { 'state': 2, 'stockSn': stock_sn })
+    invoke('add_comment', { 'state': 2, 'stockSn': stock_sn }).catch(e => {
+        console.log(e)
+    })
 }
 
 /**
@@ -368,10 +373,12 @@ function changeMenu() {
 
 // 添加库存
 function countAdd(item) {
-    showModal.value = true
-    countAddName.value = item.product_name
-    countAddStockSn.value = item.stock_sn
-    countAddNum.value = 0
+    if (isRoot.value === true) {
+        showModal.value = true
+        countAddName.value = item.product_name
+        countAddStockSn.value = item.stock_sn
+        countAddNum.value = 0
+    }
 }
 
 function countAddConfirm() {
@@ -380,12 +387,15 @@ function countAddConfirm() {
     invoke('add_product_count', { 'stockSn': countAddStockSn.value, 'num': countAddNum.value, 'name': countAddName.value })
         .then(e => {
             if (e.code == 1) {
+                console.log(e)
                 message.error("库存增加失败" + e)
             } else {
                 message.success("添加成功")
+                getProductList();
             }
         })
         .catch(e => {
+            console.log(e)
             message.error("库存增加失败" + e)
         })
     countAddStockSn.value = -1
