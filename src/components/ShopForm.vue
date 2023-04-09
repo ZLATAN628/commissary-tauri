@@ -103,9 +103,11 @@
                         <template #header-extra>
                             {{ countAddName }}
                         </template>
-                        <n-input></n-input>
-                        <template #footer style="text-align: center;">
-                            <n-button>确认</n-button>
+                        <n-input-number v-model:value="countAddNum" :allow-input="true" clearable min="0" />
+                        <template #footer>
+                            <div style="text-align: center;width: 100%;">
+                                <n-button @click="countAddConfirm">确认</n-button>
+                            </div>
                         </template>
                     </n-card>
                 </n-modal>
@@ -145,7 +147,7 @@ import {
     NButton, NIcon, NLayout, NLayoutSider,
     NMenu, NLayoutFooter, NLayoutHeader,
     NGradientText, useMessage, NSpin, NImage,
-    NRate, NInput, NPopover, NModal
+    NRate, NInput, NPopover, NModal, NInputNumber
 } from "naive-ui";
 import { MdAdd, MdRemove, MdThumbsUp as thumbsUp, MdThumbsDown as thumbsDown } from "@vicons/ionicons4";
 import { Coffee, Cup, BorderAll, Meat, History } from "@vicons/tabler";
@@ -201,9 +203,12 @@ const menuOptions = ref([
     },
 ])
 
+// 库存增加相关
 const countAddName = ref("")
-
+const countAddNum = ref(0)
+const countAddStockSn = ref(-1)
 const showModal = ref(false)
+
 // 商品列表的遮罩是否显示
 const show = ref(false)
 // 商品列表样式反转
@@ -362,10 +367,32 @@ function changeMenu() {
 }
 
 // 添加库存
-async function countAdd(item) {
+function countAdd(item) {
     showModal.value = true
     countAddName.value = item.product_name
+    countAddStockSn.value = item.stock_sn
+    countAddNum.value = 0
 }
+
+function countAddConfirm() {
+    if (!~countAddStockSn.value || countAddNum.value <= 0) return;
+
+    invoke('add_product_count', { 'stockSn': countAddStockSn.value, 'num': countAddNum.value, 'name': countAddName.value })
+        .then(e => {
+            if (e.code == 1) {
+                message.error("库存增加失败" + e)
+            } else {
+                message.success("添加成功")
+            }
+        })
+        .catch(e => {
+            message.error("库存增加失败" + e)
+        })
+    countAddStockSn.value = -1
+    countAddName.value = ""
+    showModal.value = false
+}
+
 
 
 </script>

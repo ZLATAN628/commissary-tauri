@@ -103,35 +103,69 @@ pub async fn do_settle0(data: String) -> String {
             "amount"=> p.amount,
         })
     ) {
-        Ok(_) => send_qq_msg(&config.name, &settle_list).await,
+        Ok(_) => send_qq_msg(&settle_list).await,
         Err(e) => JsResult::<String>::fail(format!("结算失败：{}", e)),
     }
 }
 
-async fn send_qq_msg(name: &str, settle_list: &Vec<Product>) -> String {
-    let mut message = format!(
-        "[TEST] {} 于 {} 购买商品：",
-        name,
-        Local::now().format("%Y年%m月%d日 %H:%M:%S").to_string()
-    );
+// async fn send_qq_msg(name: &str, settle_list: &Vec<Product>) -> String {
+//     let mut message = format!(
+//         "[TEST] {} 于 {} 购买商品：",
+//         name,
+//         Local::now().format("%Y年%m月%d日 %H:%M:%S").to_string()
+//     );
+//     for item in settle_list.iter() {
+//         if item.get_num() > 0 {
+//             message
+//                 .push_str(format!("{} {} 件，", item.get_product_name(), item.get_num()).as_str());
+//         }
+//     }
+//     let compile = Regex::new("，$").unwrap();
+//     message = compile.replace(message.as_str(), "。").to_string();
+//     let param = json!({
+//         "group_id": 771090124,
+//         "message": message.as_str(),
+//     });
+//     match async_post("send_group_msg", &param).await {
+//         Ok(_) => (),
+//         Err(err) => {
+//             return JsResult::<String>::fail(format!("结算成功，但是消息推送失败: {}", err))
+//         }
+//     };
+//     JsResult::success(String::from("结算成功"))
+// }
+
+async fn send_qq_msg(settle_list: &Vec<Product>) -> String {
+    let mut message = "库存警告：".to_string();
+    let mut flag = false;
     for item in settle_list.iter() {
-        if item.get_num() > 0 {
-            message
-                .push_str(format!("{} {} 件，", item.get_product_name(), item.get_num()).as_str());
+        if item.get_num() > 0 && item.get_remain() < 5 {
+            flag = true;
+            message.push_str(
+                format!(
+                    "{} 仅剩 {} 件，",
+                    item.get_product_name(),
+                    item.get_remain()
+                )
+                .as_str(),
+            );
         }
     }
-    let compile = Regex::new("，$").unwrap();
-    message = compile.replace(message.as_str(), "。").to_string();
-    let param = json!({
-        "group_id": 771090124,
-        "message": message.as_str(),
-    });
-    match async_post("send_group_msg", &param).await {
-        Ok(_) => (),
-        Err(err) => {
-            return JsResult::<String>::fail(format!("结算成功，但是消息推送失败: {}", err))
-        }
-    };
+    if flag {
+        let compile = Regex::new("，$").unwrap();
+        message = compile.replace(message.as_str(), "。").to_string();
+        message.push_str(" 请尽快补货！");
+        let param = json!({
+            "group_id": 771090124,
+            "message": message.as_str(),
+        });
+        match async_post("send_group_msg", &param).await {
+            Ok(_) => (),
+            Err(err) => {
+                return JsResult::<String>::fail(format!("结算成功，但是消息推送失败: {}", err))
+            }
+        };
+    }
     JsResult::success(String::from("结算成功"))
 }
 

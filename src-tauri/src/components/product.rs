@@ -1,9 +1,10 @@
 use mysql::{params, prelude::*};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use crate::JsResult;
 
-use super::{ini_parse::parse_ini, minio, DB_POOL};
+use super::{ini_parse::parse_ini, minio, qq_robot, DB_POOL};
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Product {
@@ -83,11 +84,23 @@ impl Product {
         self.product_name.as_str()
     }
 
+    fn price(&self) -> f32 {
+        self.price
+    }
+
+    fn count(&self) -> f32 {
+        self.count
+    }
+
     fn get_image(&self) -> String {
         match &self.image {
             Some(e) => e.clone(),
             None => String::new(),
         }
+    }
+
+    pub fn get_remain(&self) -> i32 {
+        self.count as i32 - self.get_num()
     }
 }
 
@@ -173,6 +186,9 @@ pub async fn insert_product0(data: String) -> String {
         .get_conn()
         .unwrap();
 
+    // 拷贝一份 给消息推送
+    let product = obj.clone();
+
     match conn.exec_drop("insert into commissary_product_main (product_id, product_name, product_type, cost, count, price, stock_time, owner, image)
     values (0, :product_name, :product_type, :cost, :count, :price, sysdate(), :owner, :image)", params! {
         "product_name" => obj.product_name,
@@ -183,7 +199,58 @@ pub async fn insert_product0(data: String) -> String {
         "owner" => obj.owner,
         "image" => image,
     }) {
-        Ok(_) => JsResult::success(String::from("新增成功")),
+        Ok(_) => send_qq_msg(product).await,
         Err(e) => JsResult::<String>::fail(format!("新增失败：{}", e))
     }
+}
+
+pub async fn add_product_count0(num: i32, stock_sn: i32, name: String) -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+
+    conn.exec_drop(
+        "update commissary_product_main cm,
+        (select * from commissary_product_main where stock_sn = :stock_sn) as b
+        set cm.count = b.count + :count
+        where cm.stock_sn = b.stock_sn",
+        params! {
+            "stock_sn" =>stock_sn,
+            "count" => num
+        },
+    )
+    .unwrap();
+
+    let param = json!({
+        "group_id": 771090124,
+        "message": format!("商品【{}】库存增加 {} 欢迎大家选购", name, num ),
+    });
+    match qq_robot::async_post("send_group_msg", &param).await {
+        Ok(_) => JsResult::success("新增成功".to_string()),
+        Err(err) => {
+            return JsResult::<String>::fail(format!("新增成功，但是消息推送失败: {}", err))
+        }
+    }
+}
+
+async fn send_qq_msg(obj: Product) -> String {
+    let message = format!(
+        "新品上架！【{}】 定价 {} 元，库存 {}，欢迎大家选购",
+        obj.get_product_name(),
+        obj.price(),
+        obj.count()
+    );
+    let param = json!({
+        "group_id": 771090124,
+        "message": message.as_str(),
+    });
+    match qq_robot::async_post("send_group_msg", &param).await {
+        Ok(_) => (),
+        Err(err) => {
+            return JsResult::<String>::fail(format!("新增成功，但是消息推送失败: {}", err))
+        }
+    };
+    JsResult::success(String::from("结算成功"))
 }

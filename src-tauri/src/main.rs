@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    add_comment0, do_settle0, get_carousel_list0, get_pay_record_list0, get_product_list0,
-    get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
+    add_comment0, add_product_count0, do_settle0, get_carousel_list0, get_pay_record_list0,
+    get_product_list0, get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
 };
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -49,6 +49,11 @@ fn add_comment(state: i32, stock_sn: i32) -> String {
 }
 
 #[tauri::command]
+async fn add_product_count(num: i32, stock_sn: i32, name: String) -> String {
+    add_product_count0(num, stock_sn, name).await
+}
+
+#[tauri::command]
 async fn upload_file(path: String, file_type: String) -> String {
     match upload_file0(path, file_type).await {
         Ok(msg) => msg,
@@ -68,7 +73,8 @@ fn main() {
             get_carousel_list,
             get_pay_record_list,
             upload_file,
-            add_comment
+            add_comment,
+            add_product_count
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
