@@ -38,7 +38,7 @@
                                                 <n-rate size="small" allow-half readonly :value="item.rate" />
                                                 <n-popover trigger="hover">
                                                     <template #trigger>
-                                                        <n-button tertiary circle text style="margin-left: 15px;"
+                                                        <n-button circle text style="margin-left: 15px;"
                                                             @click="goodComment(item.stock_sn)">
                                                             <template #icon>
                                                                 <n-icon color="#397971">
@@ -51,7 +51,7 @@
                                                 </n-popover>
                                                 <n-popover trigger="hover">
                                                     <template #trigger>
-                                                        <n-button tertiary circle text style="margin-left: 10px;"
+                                                        <n-button circle text style="margin-left: 10px;"
                                                             @click="badComment(item.stock_sn)">
                                                             <template #icon>
                                                                 <n-icon color="#abc8ce">
@@ -99,7 +99,8 @@
                     </n-layout>
                 </n-space>
                 <n-modal v-model:show="showModal">
-                    <n-card style="width: 600px" title="增加库存" :bordered="false" size="huge" role="dialog" aria-modal="true">
+                    <n-card style="width: 600px" title="增加库存" :bordered="false" size="huge" role="dialog"
+                        :aria-modal="true">
                         <template #header-extra>
                             {{ countAddName }}
                         </template>
@@ -113,7 +114,7 @@
                 </n-modal>
                 <div style="text-align: right;width: 100%;margin-top: 5px;display: inline-block;">
                     <n-button color="#fcf4df" text-color="#397971" round @click="getProductList"
-                        style="margin-right: 5px;font-family:方正舒体;font-size: large;" strong="true">
+                        style="margin-right: 5px;font-family:方正舒体;font-size: large;" :strong="true">
                         刷新库存
                     </n-button>
                     <n-button color="#fcf4df" text-color="#397971" strong round @click="insertProduct"

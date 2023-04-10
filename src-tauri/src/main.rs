@@ -5,6 +5,7 @@ use commissary_tauri::{
     add_comment0, add_product_count0, do_settle0, get_carousel_list0, get_pay_record_list0,
     get_product_list0, get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
 };
+use tauri::{utils::config::AppUrl, WindowUrl};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
@@ -62,7 +63,15 @@ async fn upload_file(path: String, file_type: String) -> String {
 }
 
 fn main() {
+    let port = 1420;
+    let mut context = tauri::generate_context!();
+    let url = format!("http://localhost:{}", port).parse().unwrap();
+    let window_url = WindowUrl::External(url);
+    context.config_mut().build.dist_dir = AppUrl::Url(window_url.clone());
+    context.config_mut().build.dev_path = AppUrl::Url(window_url.clone());
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_localhost::Builder::new(port).build())
         // 提供给前端调用的rust函数 都需要在这个地方注册
         .invoke_handler(tauri::generate_handler![
             insert_product,
@@ -76,6 +85,6 @@ fn main() {
             add_comment,
             add_product_count
         ])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running tauri application");
 }
