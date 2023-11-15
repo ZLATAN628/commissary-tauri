@@ -10,8 +10,13 @@ const routes = [
             import('../views/Login.vue')
     },
     {
-        path: '/Main/:username*',
+        path: '/Main',
         name: 'Main',
+        component: Main
+    },
+    {
+        path: '/BackMain/:productList:amount:num',
+        name: 'BackMain',
         component: Main
     },
     {
@@ -21,7 +26,7 @@ const routes = [
             import('../views/Product.vue')
     },
     {
-        path: '/Qrcode/:productList:amount',
+        path: '/Qrcode/:productList:amount:num',
         name: 'Qrcode',
         component: () =>
             import('../views/Qrcode.vue')
@@ -31,6 +36,12 @@ const routes = [
         name: 'History',
         component: () =>
             import('../views/History.vue')
+    },
+    {
+        path: '/ShoppingList',
+        name: 'ShoppingList',
+        component: () =>
+            import('../views/ShoppingList.vue')
     }
 ]
 

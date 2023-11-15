@@ -126,10 +126,12 @@ pub fn get_product_list0() -> String {
 from (select a.stock_sn, sum(ifnull(b.num, 0)) num
       from commissary_product_main a
                left join commissary_transaction_record b on a.stock_sn = b.stock_sn
+               where a.state = 0
       group by a.stock_sn) a,
      commissary_product_main b
 where a.stock_sn = b.stock_sn
-  and (b.count - a.num) > 0
+  and b.state = 0
+  order by b.stock_sn desc
     ", &config.name);
     match conn.query_map(
         sql,
@@ -137,7 +139,7 @@ where a.stock_sn = b.stock_sn
             stock_sn,
             product_id,
             product_name,
-            product_type,
+            mut product_type,
             count,
             price,
             owner,
@@ -146,6 +148,10 @@ where a.stock_sn = b.stock_sn
             bad,
             state,
         )| {
+            // 好评商品 加入收藏分类
+            if state == 1 {
+                product_type |= 4;
+            }
             Product::new(
                 stock_sn,
                 product_id,
@@ -253,4 +259,22 @@ async fn send_qq_msg(obj: Product) -> String {
         }
     };
     JsResult::success(String::from("结算成功"))
+}
+
+pub fn delete_product0(stock_sn: i32) -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+
+    conn.exec_drop(
+        "update commissary_product_main set state = 1 where stock_sn = :stock_sn",
+        params! {
+            "stock_sn" => stock_sn
+        },
+    )
+    .unwrap();
+
+    JsResult::success(String::from("删除成功"))
 }

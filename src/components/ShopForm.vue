@@ -66,7 +66,7 @@
                                             </template>
                                             <template #action>
                                                 <n-space :size="24" item-style="text-align: right;">
-                                                    <n-button-group>
+                                                    <n-button-group v-if="item.count > 0">
                                                         <n-button @click="Add(item.stock_sn)">
                                                             <template #icon>
                                                                 <n-icon><md-add /></n-icon>
@@ -78,6 +78,22 @@
                                                             </template>
                                                         </n-button>
                                                     </n-button-group>
+                                                    <n-button v-else-if="isRoot" @click="del(item.stock_sn)">
+                                                        <template #icon>
+                                                            <n-icon>
+                                                                <mood-sad />
+                                                            </n-icon>
+                                                        </template>
+                                                        删除商品
+                                                    </n-button>
+                                                    <n-button v-else @click="AddShopMessage(item.stock_sn)">
+                                                        <template #icon>
+                                                            <n-icon>
+                                                                <mood-sad />
+                                                            </n-icon>
+                                                        </template>
+                                                        快点进货
+                                                    </n-button>
                                                     <n-badge :max="item.count" :processing="true" color="green">
                                                         <template #default>
                                                             <label style="font-family:方正舒体;" @click="countAdd(item)">
@@ -141,8 +157,8 @@
 </template>
 
 <script setup>
-import { h, ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { h, ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import {
     NCard, NSpace, NBadge, NButtonGroup,
     NButton, NIcon, NLayout, NLayoutSider,
@@ -151,11 +167,12 @@ import {
     NRate, NInput, NPopover, NModal, NInputNumber
 } from "naive-ui";
 import { MdAdd, MdRemove, MdThumbsUp as thumbsUp, MdThumbsDown as thumbsDown } from "@vicons/ionicons4";
-import { Coffee, Cup, BorderAll, Meat, History } from "@vicons/tabler";
+import { Coffee, Cup, BorderAll, Meat, History, MoodSad, Star, ListNumbers } from "@vicons/tabler";
 import { invoke } from "@tauri-apps/api/tauri";
 
 const message = useMessage();
 const router = useRouter();
+let route = useRoute();
 // 已选商品数
 const selectedShopNum = ref(0)
 // 总金额
@@ -184,10 +201,15 @@ const productOptions = ref([
         icon: renderIcon(Cup)
     },
     {
-        label: "小俞咖啡",
-        key: "3",
-        icon: renderIcon(Coffee)
+        label: "收藏",
+        key: "4",
+        icon: renderIcon(Star)
     },
+    // {
+    //     label: "小俞咖啡",
+    //     key: "3",
+    //     icon: renderIcon(Coffee)
+    // },
 ]);
 
 const menuOptions = ref([
@@ -202,6 +224,11 @@ const menuOptions = ref([
         key: "1",
         icon: renderIcon(History),
     },
+    {
+        label: "消费榜单",
+        key: "2",
+        icon: renderIcon(ListNumbers),
+    },
 ])
 
 // 库存增加相关
@@ -209,6 +236,7 @@ const countAddName = ref("")
 const countAddNum = ref(0)
 const countAddStockSn = ref(-1)
 const showModal = ref(false)
+const repeatMap = new Map();
 
 // 商品列表的遮罩是否显示
 const show = ref(false)
@@ -221,8 +249,19 @@ const searchText = ref("")
 
 //------------------------页面初始流程-----------------------------
 
-getProductList();
+
 getUserInfo();
+
+onMounted(async () => {
+    if (route.params.productList) {
+        productList.value = JSON.parse(route.params.productList);
+        totalAmount.value = Number(route.params.amount).toFixed(2) || (0).toFixed(2);
+        selectedShopNum.value = Number(route.params.num) || 0;
+        repeatMap.clear();
+    } else {
+        await getProductList();
+    }
+})
 
 //------------------------Rust 函数-------------------------------
 
@@ -239,6 +278,7 @@ async function getProductList() {
     selectedShopNum.value = 0;
     totalAmount.value = 0;
     show.value = false;
+    repeatMap.clear();
 }
 
 
@@ -271,16 +311,35 @@ function Sub(stock_sn) {
     });
 }
 
+async function del(stock_sn) {
+    invoke('delete_product', { 'stockSn': stock_sn }).then(e => {
+        message.success("删除成功");
+        getProductList();
+    }).catch(e => {
+        message.error("删除失败！" + e);
+    })
+}
+
+function AddShopMessage(stock_sn) {
+
+    let times = repeatMap.get(stock_sn) || 0;
+    if (Number(times) < 5) {
+        message.success('已收到您的催货请求，请耐心等候！');
+    } else {
+        message.success('差不多就行了，再催也没用！');
+    }
+    repeatMap.set(stock_sn, times + 1);
+}
+
 let filterProductList = computed(() => {
     if (searchText.value !== "") {
         return productList.value.filter(e => ~e.product_name.indexOf(searchText.value))
     } else {
-        return productList.value.filter(e => productType.value === 0 || e.product_type == productType.value)
+        return productList.value.filter(e => productType.value === 0 || (e.product_type & productType.value) != 0)
     }
-
 });
 
-function changeProductType(key, item) {
+function changeProductType(key) {
     productType.value = Number(key);
 }
 
@@ -346,7 +405,8 @@ async function doSettle() {
         name: "Qrcode",
         params: {
             productList: JSON.stringify(temp),
-            amount: Number(totalAmount.value)
+            amount: Number(totalAmount.value),
+            num: selectedShopNum.value
         }
     })
 }
@@ -363,13 +423,19 @@ async function getUserInfo() {
     }
 }
 
-function changeMenu() {
-    router.push({
-        name: "History",
-        params: {
-            "name": userInfo.value.name
-        }
-    })
+function changeMenu(key) {
+    if (key == 1) {
+        router.push({
+            name: "History",
+            params: {
+                "name": userInfo.value.name
+            }
+        })
+    } else if (key == 2) {
+        router.push({
+            name: "ShoppingList",
+        })
+    }
 }
 
 // 添加库存

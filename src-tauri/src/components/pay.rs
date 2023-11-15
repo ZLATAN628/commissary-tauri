@@ -3,6 +3,7 @@ use super::DB_POOL;
 use super::{ini_parse::parse_ini, product::*};
 use crate::components::config;
 use crate::JsResult;
+use chrono::{Datelike, Local};
 use mysql::{params, prelude::*};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -24,6 +25,13 @@ pub struct PayRecordShow {
     no: i32,
     pay_time: String,
     info: String,
+    amount: f32,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct TotalRecordShow {
+    no: i32,
+    customer_name: String,
     amount: f32,
 }
 
@@ -185,5 +193,41 @@ pub fn get_pay_record_list0(name: String) -> String {
     }) {
         Ok(v) => JsResult::success(v),
         Err(e) => JsResult::<String>::fail(format!("查询支付记录失败：{}", e)),
+    }
+}
+
+pub fn get_total_record_list0(record_type: i32) -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+
+    let mut record_str = String::new();
+    if record_type == 1 {
+        let dt = Local::now();
+        record_str = format!("where pay_time > '{}-{}-01' ", dt.year(), dt.month());
+    }
+    let sql = format!(
+        "
+        SELECT @rownum := @rownum + 1 as no,
+        a.*
+        FROM (select sum(amount) amount, customer_name
+        from commissary_transaction_record
+        {}
+        group by customer_name
+        order by amount desc) a,
+        (SELECT @rownum := 0) b
+        ORDER BY no",
+        record_str
+    );
+
+    match conn.query_map(&sql, |(no, amount, customer_name)| TotalRecordShow {
+        no,
+        customer_name,
+        amount,
+    }) {
+        Ok(v) => JsResult::success(v),
+        Err(e) => JsResult::<String>::fail(format!("查询支付榜单失败：{}", e)),
     }
 }

@@ -2,8 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    add_comment0, add_product_count0, do_settle0, get_carousel_list0, get_pay_record_list0,
-    get_product_list0, get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
+    add_comment0, add_product_count0, delete_product0, do_settle0, get_carousel_list0,
+    get_pay_record_list0, get_product_list0, get_total_record_list0, get_user_info0,
+    insert_product0, upload_file0, write_user_info0, JsResult,
 };
 use tauri::{utils::config::AppUrl, WindowUrl};
 
@@ -45,8 +46,18 @@ fn get_pay_record_list(name: String) -> String {
 }
 
 #[tauri::command]
+fn get_total_record_list(record_type: i32) -> String {
+    get_total_record_list0(record_type)
+}
+
+#[tauri::command]
 fn add_comment(state: i32, stock_sn: i32) -> String {
     add_comment0(state, stock_sn)
+}
+
+#[tauri::command]
+fn delete_product(stock_sn: i32) -> String {
+    delete_product0(stock_sn)
 }
 
 #[tauri::command]
@@ -83,7 +94,9 @@ fn main() {
             get_pay_record_list,
             upload_file,
             add_comment,
-            add_product_count
+            add_product_count,
+            delete_product,
+            get_total_record_list
         ])
         .run(context)
         .expect("error while running tauri application");
