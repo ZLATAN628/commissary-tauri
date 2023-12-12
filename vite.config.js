@@ -1,12 +1,13 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import dns from "dns";
 import Unocss from 'unocss/vite';
 import { presetUno, presetAttributify, presetIcons } from 'unocss'
 
 const mobile =
   process.env.TAURI_PLATFORM === "android" ||
   process.env.TAURI_PLATFORM === "ios";
-
+dns.setDefaultResultOrder('verbatim')
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [
@@ -25,6 +26,7 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // tauri expects a fixed port, fail if that port is not available
   server: {
+    host: 'localhost',
     port: 1420,
     strictPort: true,
   },

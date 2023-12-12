@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "commissary-tauri",
-    "version": "1.0.0"
+    "version": "2.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -42,9 +42,9 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "http://127.0.0.1:4001/get_update"
+        "https://cdn.jsdelivr.net/gh/ZLATAN628/commissary-tauri@master/update.json"
       ],
-      "dialog": true,
+      "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVEQjU3RkZDMUI4QUQ1Q0MKUldUTTFZb2IvSCsxN1ZBazM4NitFby83TXNDeTFRSkxpbnBuMjA0NnY2bWQ3aUZ0SjRQU0xHYWcK"
     },
     "windows": [

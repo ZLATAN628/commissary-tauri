@@ -29,6 +29,13 @@ pub struct PayRecordShow {
 }
 
 #[derive(Deserialize, Serialize, Clone)]
+pub struct UnPayRecordShow {
+    product_name: String,
+    num: i32,
+    amount: f32,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
 pub struct TotalRecordShow {
     no: i32,
     customer_name: String,
@@ -60,7 +67,14 @@ impl PayRecord {
     }
 }
 
-pub async fn do_settle0(data: String) -> String {
+/**
+ * payway (1=正常支付，2=信用付，3=支付欠款)
+ */
+pub async fn do_settle0(data: String, payway: i32) -> String {
+    let config = parse_ini();
+    if payway == 3 {
+        return do_credit_pay(&config.name).await;
+    }
     let settle_list: Vec<Product> = match serde_json::from_str(&data) {
         Ok(v) => v,
         Err(e) => {
@@ -73,7 +87,6 @@ pub async fn do_settle0(data: String) -> String {
         .get_conn()
         .unwrap();
     // 获取购买次数
-    let config = parse_ini();
     let pay_ide = conn
         .exec_first(
             "select pay_ide from commissary_transaction_record where customer_name = :name order by pay_ide desc limit 1 ",
@@ -98,18 +111,60 @@ pub async fn do_settle0(data: String) -> String {
 
     let record_list = PayRecord::from_settle_list(&settle_list, pay_ide + 1);
     match conn.exec_batch(
-        r"insert into commissary_transaction_record(pay_ide, stock_sn, num, customer_name, pay_time, amount)
-            values (:pay_ide, :stock_sn, :num, :customer_name, sysdate(), :amount)",
+        r"insert into commissary_transaction_record(pay_ide, stock_sn, num, customer_name, pay_time, amount, pay_state)
+            values (:pay_ide, :stock_sn, :num, :customer_name, sysdate(), :amount, :payway)",
         record_list.iter().map(|p| params! {
             "pay_ide" => p.pay_ide,
             "stock_sn"=> p.stock_sn,
             "num"=> p.num,
             "customer_name"=> p.customer_name.clone(),
             "amount"=> p.amount,
+            "payway"=>payway
         })
     ) {
         Ok(_) => send_qq_msg(&settle_list).await,
         Err(e) => JsResult::<String>::fail(format!("结算失败：{}", e)),
+    }
+}
+
+async fn do_credit_pay(username: &str) -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+    match conn.exec_drop(
+        format!(
+            "update commissary_transaction_record set pay_state = 0 where customer_name = :username"
+        ),
+        params! {
+            "username" => username,
+        },
+    ) {
+        Ok(_) => JsResult::success("结算成功"),
+        Err(e) => JsResult::<String>::fail(format!("结算失败：{}", e)),
+    }
+}
+
+pub async fn get_arrears_amount0() -> String {
+    let mut conn = DB_POOL
+        .get()
+        .expect("Error get pool from OneCell<Pool>")
+        .get_conn()
+        .unwrap();
+    let config = parse_ini();
+    let sql = format!(
+        "select a.product_name, sum(b.num) num, sum(b.amount) amount from commissary_product_main a,
+        commissary_transaction_record b where a.stock_sn = b.stock_sn and b.customer_name = '{}'
+        and b.pay_state = 1 group by product_name", &config.name);
+
+    match conn.query_map(&sql, |(product_name, num, amount)| UnPayRecordShow {
+        product_name,
+        num,
+        amount,
+    }) {
+        Ok(v) => JsResult::success(v),
+        Err(e) => JsResult::<String>::fail(format!("查询欠款记录失败：{}", e)),
     }
 }
 

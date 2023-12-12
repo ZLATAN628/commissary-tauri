@@ -2,9 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use commissary_tauri::{
-    add_comment0, add_product_count0, delete_product0, do_settle0, get_carousel_list0,
-    get_pay_record_list0, get_product_list0, get_total_record_list0, get_user_info0,
-    insert_product0, upload_file0, write_user_info0, JsResult,
+    add_comment0, add_product_count0, delete_product0, do_settle0, get_arrears_amount0,
+    get_carousel_list0, get_pay_record_list0, get_product_list0, get_total_record_list0,
+    get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
 };
 use tauri::{utils::config::AppUrl, WindowUrl};
 
@@ -31,8 +31,8 @@ fn write_user_info(name: String) -> String {
 }
 
 #[tauri::command]
-async fn do_settle(data: String) -> String {
-    do_settle0(data).await
+async fn do_settle(data: String, payway: i32) -> String {
+    do_settle0(data, payway).await
 }
 
 #[tauri::command]
@@ -66,6 +66,11 @@ async fn add_product_count(num: i32, stock_sn: i32, name: String) -> String {
 }
 
 #[tauri::command]
+async fn get_arrears_amount() -> String {
+    get_arrears_amount0().await
+}
+
+#[tauri::command]
 async fn upload_file(path: String, file_type: String) -> String {
     match upload_file0(path, file_type).await {
         Ok(msg) => msg,
@@ -96,7 +101,8 @@ fn main() {
             add_comment,
             add_product_count,
             delete_product,
-            get_total_record_list
+            get_total_record_list,
+            get_arrears_amount
         ])
         .run(context)
         .expect("error while running tauri application");

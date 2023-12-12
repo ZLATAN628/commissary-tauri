@@ -21,14 +21,35 @@
                 </n-space>
             </n-image-group>
         </div>
-        <div style="margin-top: 10px;">
-            <label style="color: red;margin-left: 40px;font-size: 16px;"> 支付成功后请点击 => </label>
-            <n-button type="primary" @click="doSettle" :disabled="paybutton" size="large">
-                我已支付
-            </n-button>
-            <n-button type="error" style="margin-left: 50px;" @click="cancel" size="large">
-                取消支付
-            </n-button>
+        <div style="margin-top: 8px;text-align: center;">
+            <n-popover trigger="hover">
+                <template #trigger>
+                    <n-button type="primary" @click="doSettle(0)" :disabled="paybutton" size="large">
+                        我已支付
+                    </n-button>
+                </template>
+                <span>请在支付成功后点击此按钮!</span>
+            </n-popover>
+            <n-popover trigger="hover">
+                <template #trigger>
+                    <n-button type="warning" style="margin-left: 30px;" @click="doSettle(1)" :disabled="paybutton"
+                        size="large">
+                        信用支付
+                    </n-button>
+                </template>
+                <span>懒得扫码？直接赊账，下次再付！</span>
+            </n-popover>
+            <n-popover trigger="hover">
+                <template #trigger>
+                    <n-button type="error" style="margin-left: 30px;" @click="cancel" size="large">
+                        取消支付
+                    </n-button>
+                </template>
+                <span>是什么商品选错了吗？点击上方商品关闭标签 即可删除商品！</span>
+            </n-popover>
+
+
+
         </div>
         <div style="text-align: center;margin-top: 10px;font-family:方正舒体;">
             <n-gradient-text font-mono font-extrabold type="error" style="font-size: xx-large;">
@@ -45,13 +66,13 @@
 </template>
 
 <script setup>
-import { NImageGroup, NImage, NSpace, NNumberAnimation, NButton, useMessage, NGradientText, NTag } from 'naive-ui';
+import { NImageGroup, NImage, NSpace, NNumberAnimation, NButton, useMessage, NGradientText, NTag, NPopover } from 'naive-ui';
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/tauri";
-import { listen } from "@tauri-apps/api/event";
 
-let unlisten;
+
+// let unlisten;
 const message = useMessage();
 const amount = ref(0.00)
 const numberAnimationInstRef = ref(null)
@@ -63,14 +84,28 @@ let selectNumber = ref(0);
 
 onMounted(async () => {
     if (route.params.productList) {
-        productList.value = JSON.parse(route.params.productList);
-        amount.value = Number(route.params.amount);
         selectNumber.value = Number(route.params.num);
+        // -1 表示这次是 支付 之前未支付的订单信息
+        if (!~selectNumber.value) {
+            let unpayData = JSON.parse(route.params.productList);
+            let pd = [];
+            for (let i = 0; i < unpayData.length; i++) {
+                pd.push({
+                    cur: unpayData[i].num,
+                    stock_sn: i,
+                    product_name: unpayData[i].product_name,
+                })
+            }
+            productList.value = pd;
+        } else {
+            productList.value = JSON.parse(route.params.productList);
+        }
+        amount.value = Number(route.params.amount);
         numberAnimationInstRef.value?.play()
     }
-    unlisten = await listen("tauri://close-requested", async (event) => {
-        console.log("监听", event);
-    })
+    // unlisten = await listen("tauri://close-requested", async (event) => {
+    //     console.log("监听", event);
+    // })
 
 })
 
@@ -98,16 +133,31 @@ let productlistShow = computed(() => {
     return [];
 })
 
-async function doSettle() {
+async function doSettle(payway) {
+    if (!~selectNumber.value && payway === 1) {
+        message.warning("你搁这卡bug呢？还想赖账？")
+        return;
+    }
     paybutton.value = true;
-    productList.value.forEach(element => {
-        element.image = "";
-    });
-    let data = JSON.stringify(productList.value);
-    let e = await invoke('do_settle', { "data": data })
+    let data = "";
+    if (!~selectNumber.value) {
+        payway = 3;
+    } else {
+        productList.value.forEach(element => {
+            element.image = "";
+        });
+        data = JSON.stringify(productList.value);
+    }
+
+
+    let e = await invoke('do_settle', { "data": data, "payway": payway })
     let res = JSON.parse(e);
     if (res.code === 0) {
-        message.success("结算成功！！！ 请自行前往张建华身后的零食柜领取商品！！！")
+        if (!~selectNumber.value) {
+            message.success("已成功结清欠款！！！")
+        } else {
+            message.success("结算成功！！！ 请自行前往张建华身后的零食柜领取商品！！！")
+        }
     } else {
         console.log(res)
         message.error("结算失败！！！请联系俞晨星！！！" + res.msg)
@@ -118,19 +168,29 @@ async function doSettle() {
 }
 
 function cancel() {
-    unlisten()
-    router.push({
-        name: 'BackMain',
-        params: {
-            productList: JSON.stringify(productList.value),
-            amount: Number(amount.value),
-            num: selectNumber.value,
-        }
-    })
+    if (!~selectNumber.value) {
+        router.push({
+            name: 'Main',
+        })
+    } else {
+        router.push({
+            name: 'BackMain',
+            params: {
+                productList: JSON.stringify(productList.value),
+                amount: Number(amount.value),
+                num: selectNumber.value,
+            }
+        })
+    }
 }
 
 
 function handleClose(stock_sn) {
+    // 欠债不给删
+    if (!~selectNumber.value) {
+        message.warning("欠债还想删？？？");
+        return;
+    }
     if (--selectNumber.value == 0) {
         router.push({
             name: 'Main',

@@ -3,22 +3,24 @@
         <n-space vertical>
             <n-spin :show="show">
                 <template #description>
-                    可能会有点慢，没钱升级服务器带宽 (ó﹏ò｡)...
+                    {{ loadingtext }}
                 </template>
                 <n-space vertical>
                     <n-layout>
                         <n-layout-header :inverted="inverted" bordered>
-                            <n-menu mode="horizontal" :inverted="inverted" :options="menuOptions"
+                            <n-menu id="topMenu" mode="horizontal" :inverted="inverted" :options="menuOptions"
                                 :on-update:value="changeMenu" />
-                            <n-input v-model:value="searchText"
-                                style="min-width: 150px;float: right;margin-top: 5px;margin-right: 5px;" autosize autofocus
+                            <!-- <n-gradient-text v-if="arrearsAmount > 0">{{ arrearsAmount }}元</n-gradient-text> -->
+                            <n-input v-model:value="searchText" id="searchBox"
+                                style="min-width: 120px;float: right;margin-top: 5px;margin-right: 5px;" autosize autofocus
                                 type="text" placeholder="搜索商品名称" />
                         </n-layout-header>
                         <n-layout has-sider>
                             <n-layout-sider bordered show-trigger collapse-mode="width" :collapsed-width="64" :width="140"
                                 :native-scrollbar="false" :inverted="inverted" style="height: 320px">
-                                <n-menu :inverted="inverted" :collapsed-width="64" :collapsed-icon-size="22"
-                                    :options="productOptions" :on-update:value="changeProductType" />
+                                <n-menu id="productMenu" :inverted="inverted" :collapsed-width="64"
+                                    :collapsed-icon-size="22" :options="productOptions"
+                                    :on-update:value="changeProductType" />
                             </n-layout-sider>
                             <n-layout style="height: 320px;background-color: #abc8ce;" :native-scrollbar="false">
                                 <div style="display: inline-block;font-size: 10px;">
@@ -146,8 +148,8 @@
                             元
                         </label>
                     </n-gradient-text>
-                    <n-button color="#487c78" text-color="#fff0e2" style="font-family:方正舒体;font-size: 20px;" round
-                        @click="doSettle">
+                    <n-button id="settleButton" color="#487c78" text-color="#fff0e2"
+                        style="font-family:方正舒体;font-size: 20px;" round @click="doSettle">
                         结算
                     </n-button>
                 </div>
@@ -157,6 +159,7 @@
 </template>
 
 <script setup>
+
 import { h, ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import {
@@ -167,8 +170,13 @@ import {
     NRate, NInput, NPopover, NModal, NInputNumber
 } from "naive-ui";
 import { MdAdd, MdRemove, MdThumbsUp as thumbsUp, MdThumbsDown as thumbsDown } from "@vicons/ionicons4";
-import { Coffee, Cup, BorderAll, Meat, History, MoodSad, Star, ListNumbers } from "@vicons/tabler";
+import { Coffee, Cup, BorderAll, Meat, History, MoodSad, Star, ListNumbers, CreditCard } from "@vicons/tabler";
 import { invoke } from "@tauri-apps/api/tauri";
+import {
+    checkUpdate,
+    installUpdate,
+} from '@tauri-apps/api/updater';
+import { ask } from '@tauri-apps/api/dialog';
 
 const message = useMessage();
 const router = useRouter();
@@ -183,6 +191,8 @@ const productList = ref([])
 const productType = ref(0)
 
 const isRoot = ref(false)
+
+const loadingtext = ref("可能会有点慢，没钱升级服务器带宽 (ó﹏ò｡)...");
 
 const productOptions = ref([
     {
@@ -212,13 +222,7 @@ const productOptions = ref([
     // },
 ]);
 
-const menuOptions = ref([
-    {
-        label: "商品分类",
-        key: "0",
-        disabled: true,
-        icon: renderIcon(BorderAll)
-    },
+const menuOptions = computed(() => [
     {
         label: "历史订单",
         key: "1",
@@ -228,6 +232,12 @@ const menuOptions = ref([
         label: "消费榜单",
         key: "2",
         icon: renderIcon(ListNumbers),
+    },
+    {
+        label: "支付欠款：" + arrearsAmount.value + "元",
+        key: "3",
+        icon: renderIcon(CreditCard),
+        show: arrearsAmount.value > 0
     },
 ])
 
@@ -246,22 +256,94 @@ const inverted = ref(false)
 const userInfo = ref({})
 // 搜索框内容
 const searchText = ref("")
+// 未支付数据
+const unpayData = ref([])
 
 //------------------------页面初始流程-----------------------------
-
 
 getUserInfo();
 
 onMounted(async () => {
+    let cancelPay = false;
     if (route.params.productList) {
         productList.value = JSON.parse(route.params.productList);
         totalAmount.value = Number(route.params.amount).toFixed(2) || (0).toFixed(2);
         selectedShopNum.value = Number(route.params.num) || 0;
         repeatMap.clear();
+        cancelPay = true;
     } else {
         await getProductList();
     }
+    invoke('get_arrears_amount', {}).then(e => {
+        let res = JSON.parse(e);
+        if (res.code === 0) {
+            unpayData.value = res.data;
+        } else {
+            console.error("获取欠款失败 => " + res.msg);
+        }
+    }).catch(e => {
+        console.error("获取欠款失败 => " + e);
+    })
+
+    const live2d_path = "http://172.16.140.83:4002/assets/live2d/";
+
+    Promise.all([
+        loadExternalResource(live2d_path + "waifu.css", "css"),
+        loadExternalResource(live2d_path + "live2d.min.js", "js"),
+        loadExternalResource(live2d_path + "waifu-tips.js", "js")
+    ]).then(() => {
+        initWidget({
+            waifuPath: live2d_path + "waifu-tips.json",
+            cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
+            tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
+        });
+        if (cancelPay) {
+            setTimeout(() => {
+                showMessage("是有什么商品选错了吗，已为你保留订单信息，在支付界面点击上方商品标签，也可以取消部分商品哦~", 8000, 13)
+            }, 500);
+        }
+    });
+
 })
+
+function loadExternalResource(url, type) {
+    return new Promise((resolve, reject) => {
+        let tag;
+
+        if (type === "css") {
+            tag = document.createElement("link");
+            tag.rel = "stylesheet";
+            tag.href = url;
+        }
+        else if (type === "js") {
+            tag = document.createElement("script");
+            tag.src = url;
+        }
+        if (tag) {
+            tag.onload = () => resolve(url);
+            tag.onerror = () => reject(url);
+            document.head.appendChild(tag);
+        }
+    });
+}
+
+let messageTimer;
+function showMessage(text, timeout, priority) {
+    if (!text || (sessionStorage.getItem("waifu-text") && sessionStorage.getItem("waifu-text") > priority)) return;
+    if (messageTimer) {
+        clearTimeout(messageTimer);
+        messageTimer = null;
+    }
+    sessionStorage.setItem("waifu-text", priority);
+    const tips = document.getElementById("waifu-tips");
+    tips.innerHTML = text;
+    tips.classList.add("waifu-tips-active");
+    messageTimer = setTimeout(() => {
+        sessionStorage.removeItem("waifu-text");
+        tips.classList.remove("waifu-tips-active");
+    }, timeout);
+}
+
 
 //------------------------Rust 函数-------------------------------
 
@@ -280,7 +362,6 @@ async function getProductList() {
     show.value = false;
     repeatMap.clear();
 }
-
 
 
 //------------------------Js 函数---------------------------------
@@ -326,6 +407,7 @@ function AddShopMessage(stock_sn) {
     if (Number(times) < 5) {
         message.success('已收到您的催货请求，请耐心等候！');
     } else {
+        // 也就鸽子能触发了
         message.success('差不多就行了，再催也没用！');
     }
     repeatMap.set(stock_sn, times + 1);
@@ -338,6 +420,16 @@ let filterProductList = computed(() => {
         return productList.value.filter(e => productType.value === 0 || (e.product_type & productType.value) != 0)
     }
 });
+
+// 欠款金额
+let arrearsAmount = computed(() => {
+    if (unpayData.value.length === 0) return 0;
+    let total = 0;
+    unpayData.value.forEach(e => {
+        total += e.amount;
+    })
+    return total;
+})
 
 function changeProductType(key) {
     productType.value = Number(key);
@@ -397,6 +489,7 @@ function insertProduct() {
 async function doSettle() {
     let settle_list = productList.value.filter(e => e.cur > 0);
     if (!settle_list || settle_list.length <= 0) {
+        showMessage("您还什么都没选购呢？在想要购买的商品卡片下 点击加号按钮 即可加入购物车~", 8000, 13);
         return;
     }
 
@@ -435,6 +528,15 @@ function changeMenu(key) {
         router.push({
             name: "ShoppingList",
         })
+    } else if (key == 3) {
+        router.push({
+            name: "Qrcode",
+            params: {
+                productList: JSON.stringify(unpayData.value),
+                amount: Number(arrearsAmount.value),
+                num: -1
+            }
+        })
     }
 }
 
@@ -468,6 +570,27 @@ function countAddConfirm() {
     countAddStockSn.value = -1
     countAddName.value = ""
     showModal.value = false
+}
+
+lookingForUpdate()
+async function lookingForUpdate() {
+    try {
+        const { shouldUpdate, manifest } = await checkUpdate()
+        if (!shouldUpdate) return;
+        const res = await ask(manifest.body, { title: '更新提示', type: 'info' });
+        loadingtext.value = "正在升级中，请耐心等候，更新完成后程序会自动重启！"
+        show.value = true;
+        if (res) {
+            await installUpdate()
+        }
+        show.value = false;
+        loadingtext.value = "可能会有点慢，没钱升级服务器带宽(ó﹏ò｡)..."
+    } catch (e) {
+        show.value = false;
+        console.error(e);
+        message.error("出现未知异常，自动更新失败，请联系俞晨星！");
+    }
+
 }
 
 
