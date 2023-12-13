@@ -237,7 +237,7 @@ const menuOptions = computed(() => [
         label: "支付欠款：" + arrearsAmount.value + "元",
         key: "3",
         icon: renderIcon(CreditCard),
-        show: arrearsAmount.value > 0
+        show: Number(arrearsAmount.value) > 0
     },
 ])
 
@@ -294,7 +294,8 @@ onMounted(async () => {
     ]).then(() => {
         initWidget({
             waifuPath: live2d_path + "waifu-tips.json",
-            cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
+            // cdnPath: "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/",
+            cdnPath: "http://172.16.140.83:4002/assets/live2d_api/",
             tools: ["hitokoto", "asteroids", "switch-model", "switch-texture", "photo", "info", "quit"]
         });
         if (cancelPay) {
@@ -428,7 +429,7 @@ let arrearsAmount = computed(() => {
     unpayData.value.forEach(e => {
         total += e.amount;
     })
-    return total;
+    return total.toFixed(2);
 })
 
 function changeProductType(key) {
