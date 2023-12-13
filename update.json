@@ -4,7 +4,7 @@
     "pub_date": "2023-12-13T18:48:57Z",
     "platforms": {
         "windows-x86_64": {
-            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTTFZb2IvSCsxN2ExWlVrMnpLUFZZWm4zdDVCR1RtemhPY05teDB5aXpkSEpZdWtTNXlGdUFCM3c4Z25tYTBFcWx5c1ZBVk8zOCtYVjFRTVp6bldhZW9TRk5YZTRIZlFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAyNDY0OTcwCWZpbGU6Y29tbWlzc2FyeS10YXVyaV8zLjAuMV94NjRfZW4tVVMubXNpLnppcAo3MEhQZFFRL21FdUc3Q0Z5ZnpzZHgrS1BBWGJQVzFsaHZ3V2txRFQxRUxSdE91WEtnOXZ1S2xiaXFxcXZOcGFVUkNXODduYlFnUnpodDFOTEZsRHFCdz09Cg==",
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTTFZb2IvSCsxN1ljc1pjNDFPdnBvUFhUUk5HN1VHTWhQd1RQWVpFOXFrVnQvaFhxM2NmUlRYbHNHR3VoKzNHWEdaTWx5ZXYvL1JlM09oa1lUbHVhWjREWFVtRkgybVFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAyNDY2MzEwCWZpbGU6Y29tbWlzc2FyeS10YXVyaV8zLjAuMV94NjRfZW4tVVMubXNpLnppcApsL1hIZEN1NDk5eDdDcmFzWFZyMWZpZkxIRUgyc3dZbXpFaSt2VFkvWGk0RmE0U3NpU3ROMlM0Y3pBd05rSXlQMjJYY0NIWE5CQzRtb3VCeWtVM0NBUT09Cg==",
             "url": "https://gitee.com/zlatan628/commissary-tauri/releases/download/v3.0.1/commissary-tauri_3.0.1_x64_en-US.msi.zip"
         }
     }
