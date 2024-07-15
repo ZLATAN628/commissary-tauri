@@ -25,6 +25,7 @@ regex = "1.5.4"
 rust-s3 = { version = "0.32", feature = 'with-tokio' }
 tokio = { version = "1", features = ["full"] }
 tauri-plugin-localhost = "0.1.0"
+mac_address = "1.1.5"
 
 [dependencies.mysql_common]
 features = ["chrono"]

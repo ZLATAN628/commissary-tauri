@@ -1,11 +1,11 @@
 {
-    "version": "v3.0.1",
-    "notes": "云经济小卖部v3.0.1版本已发布,请更新！修复了已知 BUG",
-    "pub_date": "2023-12-13T18:48:57Z",
+    "version": "v3.0.2",
+    "notes": "云经济小卖部v3.0.2版本已发布,请更新！修复了已知 BUG",
+    "pub_date": "2024-07-15T19:35:57Z",
     "platforms": {
         "windows-x86_64": {
-            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTTFZb2IvSCsxN1ljc1pjNDFPdnBvUFhUUk5HN1VHTWhQd1RQWVpFOXFrVnQvaFhxM2NmUlRYbHNHR3VoKzNHWEdaTWx5ZXYvL1JlM09oa1lUbHVhWjREWFVtRkgybVFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzAyNDY2MzEwCWZpbGU6Y29tbWlzc2FyeS10YXVyaV8zLjAuMV94NjRfZW4tVVMubXNpLnppcApsL1hIZEN1NDk5eDdDcmFzWFZyMWZpZkxIRUgyc3dZbXpFaSt2VFkvWGk0RmE0U3NpU3ROMlM0Y3pBd05rSXlQMjJYY0NIWE5CQzRtb3VCeWtVM0NBUT09Cg==",
-            "url": "https://gitee.com/zlatan628/commissary-tauri/releases/download/v3.0.1/commissary-tauri_3.0.1_x64_en-US.msi.zip"
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUTTFZb2IvSCsxN1pBZnIvMzJBQnE0dnNqcnZrSG45MjJRK3BzajVKMS9HcVNUMGdQZGJERnNxRHhXcGZBSFRlWm5JREx5VmRWRm9JQ1RValFUS2xmMVRVYVJmcExpMkFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzIxMDQzMTg4CWZpbGU6Y29tbWlzc2FyeS10YXVyaV8zLjAuMl94NjRfZW4tVVMubXNpLnppcAphZklIQWY3dG5sOFp0Q2JFQWxXRURQYW1tS010b2hNTDBCUnk3ZU85R0lXMFl0TzIrS2tjZVlBMEFDb3I1VkF0LzNEVDVreEZ5UHFPMkQwWGxEdVNBQT09Cg==",
+            "url": "https://gitee.com/zlatan628/commissary-tauri/releases/download/v3.0.2/commissary-tauri_3.0.2_x64_en-US.msi.zip"
         }
     }
 }

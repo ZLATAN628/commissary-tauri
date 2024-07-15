@@ -3,6 +3,7 @@ pub mod config;
 pub mod images;
 pub mod ini_parse;
 pub mod minio;
+pub mod native;
 pub mod pay;
 pub mod product;
 pub mod qq_robot;

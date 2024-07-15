@@ -3,8 +3,9 @@
 
 use commissary_tauri::{
     add_comment0, add_product_count0, delete_product0, do_settle0, get_arrears_amount0,
-    get_carousel_list0, get_pay_record_list0, get_product_list0, get_total_record_list0,
-    get_user_info0, insert_product0, upload_file0, write_user_info0, JsResult,
+    get_carousel_list0, get_native_info0, get_pay_record_list0, get_product_list0,
+    get_total_record_list0, get_user_info0, insert_product0, upload_file0, write_user_info0,
+    JsResult,
 };
 use tauri::{utils::config::AppUrl, WindowUrl};
 
@@ -78,6 +79,11 @@ async fn upload_file(path: String, file_type: String) -> String {
     }
 }
 
+#[tauri::command]
+async fn get_native_info() -> String {
+    get_native_info0()
+}
+
 fn main() {
     let port = 1420;
     let mut context = tauri::generate_context!();
@@ -102,7 +108,8 @@ fn main() {
             add_product_count,
             delete_product,
             get_total_record_list,
-            get_arrears_amount
+            get_arrears_amount,
+            get_native_info
         ])
         .run(context)
         .expect("error while running tauri application");

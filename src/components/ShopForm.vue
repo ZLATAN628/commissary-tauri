@@ -149,7 +149,7 @@
                         </label>
                     </n-gradient-text>
                     <n-button id="settleButton" color="#487c78" text-color="#fff0e2"
-                        style="font-family:方正舒体;font-size: 20px;" round @click="doSettle">
+                        style="font-family:方正舒体;font-size: 20px;" round @click="doSettle" :disabled="settleDisabled">
                         结算
                     </n-button>
                 </div>
@@ -178,6 +178,10 @@ import {
 } from '@tauri-apps/api/updater';
 import { ask } from '@tauri-apps/api/dialog';
 
+// mac_address
+const GZ = "A036BC65234F";
+const BLACK_LIST = [GZ];
+
 const message = useMessage();
 const router = useRouter();
 let route = useRoute();
@@ -193,6 +197,10 @@ const productType = ref(0)
 const isRoot = ref(false)
 
 const loadingtext = ref("可能会有点慢，没钱升级服务器带宽 (ó﹏ò｡)...");
+
+const nativeInfo = ref({})
+
+const settleDisabled = ref(false)
 
 const productOptions = ref([
     {
@@ -306,6 +314,10 @@ onMounted(async () => {
     });
 
 })
+// 获取本地信息
+getNativeInfo();
+// 自动更新
+lookingForUpdate();
 
 function loadExternalResource(url, type) {
     return new Promise((resolve, reject) => {
@@ -493,13 +505,17 @@ async function doSettle() {
         showMessage("您还什么都没选购呢？在想要购买的商品卡片下 点击加号按钮 即可加入购物车~", 8000, 13);
         return;
     }
+    let totalAmount0 = Number(totalAmount.value) || 0;
+    // if (~BLACK_LIST.indexOf(nativeInfo.value.macAddress)) {
+    //     totalAmount0 = totalAmount0 * 1.5;
+    // }
 
     let temp = productList.value;
     router.push({
         name: "Qrcode",
         params: {
             productList: JSON.stringify(temp),
-            amount: Number(totalAmount.value),
+            amount: totalAmount0,
             num: selectedShopNum.value
         }
     })
@@ -573,7 +589,6 @@ function countAddConfirm() {
     showModal.value = false
 }
 
-lookingForUpdate()
 async function lookingForUpdate() {
     try {
         const { shouldUpdate, manifest } = await checkUpdate()
@@ -592,6 +607,24 @@ async function lookingForUpdate() {
         message.error("出现未知异常，自动更新失败，请联系俞晨星！");
     }
 
+}
+
+
+async function getNativeInfo() {
+    await invoke('get_native_info', {}).then(e => {
+        let res = JSON.parse(e);
+        if (res.code === 0) {
+            nativeInfo.value = res.data;
+        } else {
+            if (res.msg == "wrong user") {
+                for (let i = 0; i < 10; i++) {
+                    message.warning("请不要随意更改登录人员的名称！！！结算功能已受限！！！");
+                }
+                settleDisabled.value = true;
+            }
+        }
+
+    }).catch(e => { console.error("get_native_info error => " + e) })
 }
 
 

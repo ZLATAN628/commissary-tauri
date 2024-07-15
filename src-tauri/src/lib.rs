@@ -5,6 +5,7 @@ pub use components::{
     images::get_carousel_list0,
     ini_parse::{get_user_info0, write_user_info0},
     minio::upload_file0,
+    native::get_native_info0,
     pay::{do_settle0, get_arrears_amount0, get_pay_record_list0, get_total_record_list0},
     product::{add_product_count0, delete_product0, get_product_list0, insert_product0},
     qq_robot::test0,
